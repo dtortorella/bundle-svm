@@ -12,6 +12,7 @@ function output = svr_predict(model, input)
 %
 % SEE ALSO svr_train
 
+output = predict(model,input);
 
 
 end
