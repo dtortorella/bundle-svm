@@ -1,4 +1,4 @@
-function class = svm_predict(model, feature)
+function class = svm_predict(model, features)
 % SVM_PREDICT Predicts the class of a sample according to the model
 %
 % SYNOPSIS: class = svm_predict(model, feature)
@@ -12,6 +12,6 @@ function class = svm_predict(model, feature)
 %
 % SEE ALSO svm_train
 
-
+class = predict(model,features);
 
 end

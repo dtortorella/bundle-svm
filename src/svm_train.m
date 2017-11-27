@@ -6,7 +6,9 @@ function model = svm_train(features, classes, kernel, nu)
 % INPUT:
 % - features: a matrix containing one sample feature vector per row
 % - classes: a column vector containing one sample class per entry, must be +/-1
-% - kernel: a function that computes the scalar product of two vectors in feature space
+% - kernel: a function name that computes the scalar product of two vectors
+% in feature space. Use 'linear' | 'gaussian' | 'rbf' | 'polynomial' for
+% standard implementations or give a function name for user implementation
 % - nu: hyperparameter, fraction of support vectors (between 0 and 1)
 %
 % OUTPUT:
@@ -16,6 +18,6 @@ function model = svm_train(features, classes, kernel, nu)
 %
 % SEE ALSO svr_train, svm_predict
 
-
+model = fitcsvm(features,classes,'KernelFunction', kernel);
 
 end

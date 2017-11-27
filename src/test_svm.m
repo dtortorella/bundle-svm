@@ -1,0 +1,11 @@
+M = importdata("../data/monks-1.train.csv");
+c = M(:,1);
+classes = c*2 - ones(length(c),1);
+features = M(:,2:end);
+proportion = floor(2*length(c)/3);
+TRfeatures = features(1:proportion,:);
+TRclasses = classes(1:proportion);
+TSfeatures = features(proportion+1:end,:);
+TSclasses = classes(proportion+1:end);
+mdl = svm_train(TRfeatures,TRclasses,'gaussian',0.50);
+prediction = svm_predict(mdl,TSfeatures)
