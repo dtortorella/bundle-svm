@@ -12,6 +12,9 @@ function class = svm_predict(model, features)
 %
 % SEE ALSO svm_train
 
-class = predict(model,features);
+%class = predict(model,features);
+% dummy implementation not possible since LibSVM implementation 
+% doesn't fit the current function signature: libsvmpredict expects test 
+% labels in input in order to compute accurancy
 
 end
