@@ -12,7 +12,9 @@ function output = svr_predict(model, input)
 %
 % SEE ALSO svr_train
 
-output = predict(model,input);
-
+%output = predict(model,input);
+% dummy implementation not possible since LibSVM implementation 
+% doesn't fit the current function signature: libsvmpredict expects test 
+% labels in input in order to compute accurancy
 
 end
