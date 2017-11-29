@@ -8,5 +8,5 @@ TR_classes = classes(1:proportion);
 TS_features = features(proportion+1:end,:);
 TS_classes = classes(proportion+1:end);
 mdl = svm_train(TR_features, TR_classes, 2 ,0.50); %using rbf kernel (see svm_train file)
-%prediction = svm_predict(mdl,TSfeatures)
-prediction = libsvmpredict(TS_classes,TS_features, mdl); %using directly LibSVM . see svm_predict file
+prediction = svm_predict(mdl,TS_features);
+
