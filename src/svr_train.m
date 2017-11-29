@@ -6,9 +6,7 @@ function [model, epsilon] = svr_train(inputs, outputs, kernel, nu, C)
 % INPUT:
 % - inputs: a matrix containing one input sample per row
 % - outputs: a column vector containing one output sample per entry
-% - kernel: a function that computes the scalar product of two vectors in
-% feature space. Use 'linear' | 'gaussian' | 'rbf' | 'polynomial' for
-% standard implementations or give a function name of user implementation
+% - kernel: a function that computes the scalar product of two vectors in feature space
 % - nu: hyperparameter, fraction of support vectors (between 0 and 1)
 % - C: hyperparameter, a non-negative regularization constant
 %
