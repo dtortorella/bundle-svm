@@ -1,20 +1,20 @@
-function class = svm_predict(model, features)
+function classes = svm_predict(model, features)
 % SVM_PREDICT Predicts the class of a sample according to the model
 %
-% SYNOPSIS: class = svm_predict(model, feature)
+% SYNOPSIS: classes = svm_predict(model, features)
 %
 % INPUT:
 % - model: a structure representing a n-SVM model
-% - feature: a row vector of the sample features
+% - features: a matrix containing one sample feature vector per row
 %
 % OUTPUT:
-% - class: the predicted class of this sample (+/-1)
+% - classes: a column vector of predicted class for each sample (+/-1)
 %
 % SEE ALSO svm_train
 
 
 %dirty workarounnd passing a zero vector as labels, since libscvpredict do
 %want some testlabel
-class = libsvmpredict(ones(length(features),1), features, model);
+classes = libsvmpredict(ones(length(features),1), features, model);
 
 end

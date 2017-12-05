@@ -1,20 +1,20 @@
-function output = svr_predict(model, input)
+function outputs = svr_predict(model, inputs)
 % SVR_PREDICT Predicts the output of a function according to the model
 %
-% SYNOPSIS: output = svr_predict(model, input)
+% SYNOPSIS: outputs = svr_predict(model, inputs)
 %
 % INPUT:
 % - model: a structure representing a n-SVR model
-% - input: a row vector of the function input point
+% - inputs: a matrix containing one input sample per row
 %
 % OUTPUT:
-% - output: the estimated output of the function in this point
+% - outputs: the column vector of the function estimated output for each point
 %
 % SEE ALSO svr_train
 
 
 %dirty workarounnd passing a zero vector as labels, since libscvpredict do
 %want some testlabel
-output = libsvmpredict(zeros(length(input),1), input, model);
+outputs = libsvmpredict(zeros(length(inputs),1), inputs, model);
 
 end
