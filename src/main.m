@@ -11,11 +11,7 @@ monk1_test_classes = monk1_test_set(:,1) * 2 - 1;
 monk1_test_features = monk1_test_set(:,2:end);
 
 % Model selection
-%
-%
-monk1_kernel = 0; % see svm_train file for kernel
-monk1_nu = 0.5;
-%
+[monk1_kernel, monk1_nu] = svm_select_model(monk1_train_features, monk1_train_classes, 5, {0,2});
 
 % Training
 monk1_model = svm_train(monk1_train_features, monk1_train_classes, monk1_kernel , monk1_nu); 
@@ -38,11 +34,7 @@ monk2_test_classes = monk2_test_set(:,1) * 2 - 1;
 monk2_test_features = monk2_test_set(:,2:end);
 
 % Model selection
-%
-%
-monk2_kernel = 2ww; % see svm_train file for kernel
-monk2_nu = 0.5;
-%
+[monk2_kernel, monk2_nu] = svm_select_model(monk2_train_features, monk2_train_classes, 5, {0,2});
 
 % Training
 monk2_model = svm_train(monk2_train_features, monk2_train_classes, monk2_kernel , monk2_nu); 
@@ -64,11 +56,7 @@ monk3_test_classes = monk3_test_set(:,1) * 2 - 1;
 monk3_test_features = monk3_test_set(:,2:end);
 
 % Model selection
-%
-%
-monk3_kernel = 0; % see svm_train file for kernel
-monk3_nu = 0.5;
-%
+[monk2_kernel, monk2_nu] = svm_select_model(monk2_train_features, monk2_train_classes, 5, {0,2});
 
 % Training
 monk3_model = svm_train(monk3_train_features, monk3_train_classes, monk3_kernel , monk3_nu); 
