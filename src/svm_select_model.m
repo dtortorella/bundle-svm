@@ -22,6 +22,13 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels)
 
     for kernel_index = 1:length(kernels)
         % try different kernel functions
+        
+        % graph of the accuracy function
+        figure(kernel_index);
+        hold on;
+        grid on;
+        xlabel('\nu');
+        ylabel('accuracy');
 
         for try_nu = 0:0.025:1
             % try different values of the hyperparameter nu
@@ -41,6 +48,7 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels)
             end
             
             mean_validation_accuracy = mean(validation_accuracy);
+            plot(try_nu, mean_validation_accuracy, 'b.');
 
             if mean_validation_accuracy > best_accuracy
                 % we've found a new better model from these hyperparameter settings

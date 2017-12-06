@@ -24,6 +24,15 @@ function [kernel, nu, C] = svr_select_model(inputs, outputs, folds, kernels)
     for kernel_index = 1:length(kernels)
         % try different kernel functions
 
+        % graph of the MSE function
+        figure(kernel_index);
+        hold on;
+        grid on;
+        xlabel('\nu');
+        ylabel('C');
+        zlabel('MSE');
+        set(gca,'YScale','log');
+
         for try_nu = 0:0.05:1
             for try_C = logspace(-2,6)
                 % try different values of the hyperparameters
@@ -43,6 +52,7 @@ function [kernel, nu, C] = svr_select_model(inputs, outputs, folds, kernels)
                 end
                 
                 mean_validation_mse = mean(validation_mse);
+                plot3(try_nu, try_C, mean_validation_mse, 'b.');
                 
                 if mean_validation_mse < best_mse
                     % we've found a new better model from these hyperparameter settings
