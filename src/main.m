@@ -80,16 +80,8 @@ mlcup_test_inputs = mlcup_test_set(:,2:end);
 
 
 % Model selection 
-%
-%
-mlcup_nu1 = 0.5;
-mlcup_kernel1 = 2; %using rbf kernel (see svm_train file)
-mlcup_C1 = iqr(mlcup_train_outputs1)/1.349; % C value computed as the standard value in BoxConstraint of fitrsvm with rbf kernel
-
-mlcup_nu2 = 0.5;
-mlcup_kernel2 = 2;
-mlcup_C2 = iqr(mlcup_train_outputs2)/1.349;
-%
+[mlcup_kernel1, mlcup_nu1, mlcup_C1] = svr_select_model(mlcup_train_inputs, mlcup_train_outputs1, {0,2});
+[mlcup_kernel2, mlcup_nu2, mlcup_C2] = svr_select_model(mlcup_train_inputs, mlcup_train_outputs2, {0,2});
 
 
 % Training models

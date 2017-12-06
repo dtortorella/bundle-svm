@@ -17,7 +17,7 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels)
 %
 % SEE ALSO svr_select_model, svm_train, svm_predict
 
-    best_accuracy = 0;
+    best_accuracy = -Inf;
     dataset_partition = kfolds_partition(size(features, 1), folds);
 
     for kernel_index = 1:length(kernels)
