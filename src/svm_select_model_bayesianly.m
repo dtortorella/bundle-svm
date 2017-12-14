@@ -31,7 +31,7 @@ end
 function inaccuracy = crossvalidation_error(features, classes, folds, kernels, hyperparameters)
 % Computes the cross-validation error (1 - accuracy) for this dataset and hyperparameters
     hyperparameters = table2struct(hyperparameters);
-    dataset_partition = kfolds_partition(size(inputs, 1), folds);
+    dataset_partition = kfolds_partition(size(features, 1), folds);
     validation_error = zeros(1, folds);  % keeps the validation MSE for each fold
 
     for fold_index = 1:folds
@@ -41,9 +41,13 @@ function inaccuracy = crossvalidation_error(features, classes, folds, kernels, h
         validation_features = features((dataset_partition == fold_index),:);
         validation_classes = classes((dataset_partition == fold_index),:);
         % train and estimate the validation accuracy for this partition
-        model = svm_train(training_features, training_classes, kernels(hyperparameters.kernel), hyperparameters.nu);
-        predictions = svm_predict(model, validation_features);
-        validation_error(fold_index) = sum(predictions ~= validation_classes) / length(validation_classes);
+        model = svm_train(training_features, training_classes, kernels(char(hyperparameters.kernel)), hyperparameters.nu);
+        if isstruct(model)
+            predictions = svm_predict(model, validation_features);
+            validation_error(fold_index) = sum(predictions ~= validation_classes) / length(validation_classes);
+        else
+            validation_error(fold_index) = 1;
+        end
     end
 
     inaccuracy = mean(validation_error);

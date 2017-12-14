@@ -20,7 +20,7 @@ function [kernel, nu, C] = svr_select_model_bayesianly(inputs, outputs, folds, k
 
     parameter_kernel = optimizableVariable('kernel', kernels.keys, 'Type', 'categorical');
     parameter_nu = optimizableVariable('nu', [0,1], 'Type', 'real');
-    parameter_C = optimizableVariable('C', [1e-3,1e+5], 'Type', 'real');
+    parameter_C = optimizableVariable('C', [1e-3,1e+3], 'Type', 'real');
     objective_function = @(x) crossvalidation_error(inputs, outputs, folds, kernels, x);
     
     result = bayesopt(objective_function, [parameter_kernel, parameter_nu, parameter_C]);
@@ -37,19 +37,22 @@ function mse = crossvalidation_error(inputs, outputs, folds, kernels, hyperparam
     dataset_partition = kfolds_partition(size(inputs, 1), folds);
     validation_mse = zeros(1, folds);  % keeps the validation MSE for each fold
 
+    fprintf('\n K = %s, nu = %f, C = %f: ', char(hyperparameters.kernel), hyperparameters.nu, hyperparameters.C);
     for fold_index = 1:folds
         % pick one fold at a time for validation, leave the others for training
         training_inputs = inputs((dataset_partition ~= fold_index),:);
         training_outputs = outputs((dataset_partition ~= fold_index),:);
         validation_inputs = inputs((dataset_partition == fold_index), :);
         validation_outputs = outputs((dataset_partition == fold_index),:);
+        fprintf('%d ', fold_index);
         % train and estimate the validation MSE for this partition
-        model = svr_train(training_inputs, training_outputs, kernels(hyperparameters.kernel), hyperparameters.nu, hyperparameters.C);
+        model = svr_train(training_inputs, training_outputs, kernels(char(hyperparameters.kernel)), hyperparameters.nu, hyperparameters.C);
         predictions = svr_predict(model, validation_inputs);
         validation_mse(fold_index) = sum((predictions - validation_outputs) .^ 2) / length(validation_outputs);
     end
 
     mse = mean(validation_mse);
+    fprintf('.\n');
 end
 
 function indices = kfolds_partition(N, k)
