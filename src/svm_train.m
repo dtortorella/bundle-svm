@@ -31,7 +31,7 @@ function model = svm_train(features, classes, kernel, nu)
 %   -n nu  sets the nu value of the model to nu
 %   -t k   sets the k-th kernel function type as descripted above
 
-options = sprintf('-s 1 -n %f -t %d', nu, kernel);
+options = sprintf('-s 1 -n %f -t %d -q', nu, kernel);
 
 model = libsvmtrain(classes, features, options);
 

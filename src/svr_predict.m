@@ -15,6 +15,6 @@ function outputs = svr_predict(model, inputs)
 
 %dirty workarounnd passing a zero vector as labels, since libscvpredict do
 %want some testlabel
-outputs = libsvmpredict(zeros(length(inputs),1), inputs, model);
+outputs = libsvmpredict(zeros(length(inputs),1), inputs, model, '-q');
 
 end

@@ -34,7 +34,7 @@ function [model, epsilon] = svr_train(inputs, outputs, kernel, nu, C)
 %   -c C   sets the C hyperparameter to C 
 %   -t k   sets the k-th kernel function type as descripted above
 
-options = sprintf('-s 4 -n %f -c %f -t %d', nu, C, kernel);
+options = sprintf('-s 4 -n %f -c %f -t %d -q ', nu, C, kernel);
 
 model = libsvmtrain(outputs, inputs, options);
 

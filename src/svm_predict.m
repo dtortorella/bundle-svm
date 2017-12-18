@@ -15,6 +15,6 @@ function classes = svm_predict(model, features)
 
 %dirty workarounnd passing a zero vector as labels, since libscvpredict do
 %want some testlabel
-classes = libsvmpredict(ones(length(features),1), features, model);
+classes = libsvmpredict(ones(length(features),1), features, model, '-q');
 
 end
