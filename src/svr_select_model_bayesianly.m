@@ -54,9 +54,3 @@ function mse = crossvalidation_error(inputs, outputs, folds, kernels, hyperparam
     mse = mean(validation_mse);
     fprintf('.\n');
 end
-
-function indices = kfolds_partition(N, k)
-% Creates the dataset labels for a k-fold partition over N samples
-    I = reshape(repmat(1:k, 1, ceil(N/k)), 1, []);
-    indices = I(1:N);
-end
