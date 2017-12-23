@@ -56,9 +56,8 @@ monk2_nu_range = 0.1:0.01:min(svm_max_feasible_nu(monk2_train_classes, monk2_fol
 check_balance(monk2_train_classes, monk2_folds);
 
 
-[monk2_kernel, monk2_nu, means] = svm_select_model(monk2_train_features, monk2_train_classes, monk2_folds, monks_kernels, monk2_nu_range)%;
-figure;
-plot(means,'.');
+[monk2_kernel, monk2_nu] = svm_select_model(monk2_train_features, monk2_train_classes, monk2_folds, monks_kernels, monk2_nu_range)%;
+
 %[monk2_kernel_bayes, monk2_nu_bayes] = svm_select_model_bayesianly(monk2_train_features, monk2_train_classes, monk2_folds, monks_kernels);
 stopp
 

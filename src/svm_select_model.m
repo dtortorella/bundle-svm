@@ -1,4 +1,4 @@
-function [kernel, nu,means] = svm_select_model(features, classes, folds, kernels, nu_range)
+function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_range)
 % SVM_SELECT_MODEL Selects the hyperparameters of a n-SVM via cross-validation
 %
 % SYNOPSIS: [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_range)
@@ -20,7 +20,7 @@ function [kernel, nu,means] = svm_select_model(features, classes, folds, kernels
 
     best_accuracy = -Inf;
     dataset_partition = kfolds_partition(size(features, 1), folds);
-    i = 1;
+ 
     for kernel_index = kernels.keys
         % try different kernel functions
         
@@ -63,16 +63,15 @@ function [kernel, nu,means] = svm_select_model(features, classes, folds, kernels
             end
             
             mean_validation_accuracy = mean(validation_accuracy);
-            means(i) = mean_validation_accuracy; i = i+1;
             plot(try_nu, mean_validation_accuracy, 'b.');
             errorbar(try_nu, mean_validation_accuracy', std(validation_accuracy,1), 'c', 'CapSize', 0);
             drawnow;
 
             if mean_validation_accuracy > best_accuracy
                 % we've found a new better model from these hyperparameter settings
-                best_accuracy = mean_validation_accuracy
-                kernel = kernel_index{1}
-                nu = try_nu
+                best_accuracy = mean_validation_accuracy;
+                kernel = kernel_index{1};
+                nu = try_nu;
             end
         end
     end
