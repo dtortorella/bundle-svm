@@ -1,4 +1,4 @@
-function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_range)
+function [kernel, nu,means] = svm_select_model(features, classes, folds, kernels, nu_range)
 % SVM_SELECT_MODEL Selects the hyperparameters of a n-SVM via cross-validation
 %
 % SYNOPSIS: [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_range)
@@ -7,7 +7,7 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_r
 % - features: a matrix containing one sample feature vector per row
 % - classes: a column vector containing one sample class per entry, must be +/-1
 % - folds: the number of folds for the cross-validation
-% - kernels: a cell array of kernel functions
+% - kernels: a map of strings -> kernel functions
 % - nu_range: a vector containing the nu values to try
 %
 % OUTPUT:
@@ -20,8 +20,8 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_r
 
     best_accuracy = -Inf;
     dataset_partition = kfolds_partition(size(features, 1), folds);
-
-    for kernel_index = 1:length(kernels)
+    i = 1;
+    for kernel_index = kernels.keys
         % try different kernel functions
         
         % graph of the accuracy function
@@ -30,6 +30,7 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_r
         grid on;
         xlabel('\nu');
         ylabel('accuracy');
+        title(kernel_index{1});
 
         for try_nu = nu_range
             % try different values of the hyperparameter nu
@@ -45,7 +46,7 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_r
                 validation_classes = classes((dataset_partition == fold_index),:);
                 
                 % train and estimate the validation accuracy for this partition
-                model = svm_train(training_features, training_classes, kernels{kernel_index}, try_nu);
+                model = svm_train(training_features, training_classes, kernels(kernel_index{1}), try_nu);
                 
                 failure = ~isstruct(model); %check if the training found a solution
                 if ~failure %do not continue if no model was found
@@ -62,14 +63,16 @@ function [kernel, nu] = svm_select_model(features, classes, folds, kernels, nu_r
             end
             
             mean_validation_accuracy = mean(validation_accuracy);
+            means(i) = mean_validation_accuracy; i = i+1;
             plot(try_nu, mean_validation_accuracy, 'b.');
-            errorbar(try_nu, mean_validation_accuracy, std(validation_accuracy,1), 'c', 'CapSize', 0);
+            errorbar(try_nu, mean_validation_accuracy', std(validation_accuracy,1), 'c', 'CapSize', 0);
+            drawnow;
 
             if mean_validation_accuracy > best_accuracy
                 % we've found a new better model from these hyperparameter settings
-                best_accuracy = mean_validation_accuracy;
-                kernel = kernels{kernel_index};
-                nu = try_nu;
+                best_accuracy = mean_validation_accuracy
+                kernel = kernel_index{1}
+                nu = try_nu
             end
         end
     end
