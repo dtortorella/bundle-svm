@@ -18,10 +18,10 @@ function [kernel, nu] = svm_select_model_bayesianly(features, classes, folds, ke
 % SEE ALSO svm_select_model, svr_select_model_bayesianly
 
     parameter_kernel = optimizableVariable('kernel', kernels.keys, 'Type', 'categorical');
-    parameter_nu = optimizableVariable('nu', [0,1], 'Type', 'real');
+    parameter_nu = optimizableVariable('nu', [0.1,min(max_feasible_nu(classes, folds))], 'Type', 'real');
     objective_function = @(x) crossvalidation_error(features, classes, folds, kernels, x);
     
-    result = bayesopt(objective_function, [parameter_kernel, parameter_nu]);
+    result = bayesopt(objective_function, [parameter_kernel, parameter_nu], 'MaxObjectiveEvaluations', 50);
     hyperparameters = table2struct(result.XAtMinObjective);
     
     kernel = hyperparameters.kernel;
