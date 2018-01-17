@@ -1,5 +1,5 @@
 function u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
-%BUNDLEIZATOR Implements a bundle method that solves a generic SVM 
+%BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
 % SYNOPSIS: u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %
@@ -12,17 +12,16 @@ function u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %         arguments the sample target y and the scalar product f = <w,x>
 % - dloss: a subgradient of the loss function with respect to f
 % - precision: the required distance from optimality
-% 
+%
 % OUTPUT:
 % - u_star: the optimal values for the coefficients of the linear
 %           combination of support vectors
 
 %% Initialization
-num_samples = size(X, 2);
+num_samples = size(X, 1);
 
 % Compunte the Gram matrix
 G = zeros(num_samples);
-
 for i = 1:num_samples
     j = 1;
     while j < i
@@ -33,36 +32,70 @@ for i = 1:num_samples
     G(i,i) = kernel(X(i,:), X(i,:));
 end
 
-% and its inverse, for later
-Ginv = inv(G);
-
 %% Zero-th step
+t = 0;
+% we take a_0, b_0 = 0
 
-% assuming a_t = 0, b_t = 0, u_t = 0
-Jt_prev = 0;
+% since the regularizer function is quadratic, its minimum is 0
+u_t = zeros(num_samples,1);
+J_t = 0;
 
-Jt = 
+% no J_0(u_-1), so to make min(Jmin, J_1(u_0)) work...
+Jmin = Inf;
 
-z = quadprog();
+A = [];
+b = [];
+H = [];
 
-F = z;
-u = F z;
-
-Jt = J(u);
-Jmin = min(Jmin, Jt+1) - Jt;
-
-
+%% Optimization loop
 while true
-    % Solve the dual of the quadratic subproblem
-    % Get optimal value thru dual connection
+    % Update a_t
+    vdloss = zeros(num_samples, 1);
+    f = G * u_t;
+    for i = 1:num_samples
+        vdloss(i) = dloss(f(i), y(i));
+    end
+    A(:,t+1) = G * vdloss;
+    
+    % Update b_t
+    Remp = 0;
+    for i = 1:num_samples
+        Remp = Remp + loss(f(i), y(i));
+    end
+    Remp = Remp / num_samples;
+    b(t+1) = Remp - A(:,t+1)' * u_t;
+    
+    % Evaluate J_t+1 at point u_t
+    R_t1 = max(u_t' * A + b(t+1));
+    J_t1 = 1/C * (u_t' * G * u_t) + R_t1;
+    
     % Compute epsilon
+    Jmin = min(Jmin, J_t1);
+    epsilon = Jmin - J_t;
+    
     % Halt when we reach the desired precision
     if epsilon <= precision
         break
     end
+    
+    % Update H
+    h = (A(:,t+1)' / G) * A;
+    H = [H, h(1:t)'; h];
+    
+    % Increment step
+    t = t + 1;
+    
+    % Solve the dual of the quadratic subproblem
+    z_t = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1);
+    % Get optimal point thru dual connection
+    u_t = -0.5 * C * (G \ (A * z_t));
+    
+    % Evaluate J at point u
+    R_t = max(u_t' * A + b(t));
+    J_t = 1/C * (u_t' * G * u_t) + R_t;
 end
 
 % Optimal value of u
-u_star = u;
+u_star = u_t;
 
 end
