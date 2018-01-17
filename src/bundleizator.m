@@ -6,11 +6,11 @@ function u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
 % - y: a column vector containing one sample target per entry
-% - C: inverse of the regularization constant (1/lambda) 
+% - C: inverse of the regularization constant (1/lambda)
 % - kernel: a function that computes the scalar product of two vectors in feature space
 % - loss: a function l(f,y) that computes the loss for a single sample, taking as
 %         arguments the sample target y and the scalar product f = <w,x>
-% - dloss: the derivative of the loss function with respect to f
+% - dloss: a subgradient of the loss function with respect to f
 % - precision: the required distance from optimality
 % 
 % OUTPUT:
@@ -32,10 +32,12 @@ for i = 1:num_samples
     end
     G(i,i) = kernel(X(i,:), X(i,:));
 end
-  
+
+% and its inverse, for later
 Ginv = inv(G);
 
-% Zero-th step
+%% Zero-th step
+
 % assuming a_t = 0, b_t = 0, u_t = 0
 Jt_prev = 0;
 
@@ -50,8 +52,17 @@ Jt = J(u);
 Jmin = min(Jmin, Jt+1) - Jt;
 
 
-
-
-
+while true
+    % Solve the dual of the quadratic subproblem
+    % Get optimal value thru dual connection
+    % Compute epsilon
+    % Halt when we reach the desired precision
+    if epsilon <= precision
+        break
+    end
 end
 
+% Optimal value of u
+u_star = u;
+
+end
