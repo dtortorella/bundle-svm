@@ -32,6 +32,15 @@ for i = 1:num_samples
     G(i,i) = kernel(X(i,:), X(i,:));
 end
 
+% Compute the reduced SVD of G
+% this is necessary for inverse operations since G is ill-conditioned
+[GU,GS,GV] = svd(G);
+% discard all singular values below precision
+Gselector = diag(GS) > 1e-6;
+sGS = GS(Gselector,Gselector);
+sGU = GU(:,Gselector);
+sGV = GV(:,Gselector);
+
 %% Zero-th step
 t = 0;
 % we take a_0, b_0 = 0
@@ -79,7 +88,8 @@ while true
     end
     
     % Update H
-    h = (A(:,t+1)' / G) * A;
+    % h = (A(:,t+1)' / G) * A;
+    h = (((A(:,t+1)' * sGV) / sGS) * sGU') * A;
     H = [H, h(1:t)'; h];
     
     % Increment step
@@ -88,7 +98,8 @@ while true
     % Solve the dual of the quadratic subproblem
     z_t = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1);
     % Get optimal point thru dual connection
-    u_t = -0.5 * C * (G \ (A * z_t));
+    % u_t = -0.5 * C * (G \ (A * z_t));
+    u_t = -0.5 * C * (sGV * (sGS \ (sGU' * (A * z_t))));
     
     % Evaluate J at point u
     R_t = max(u_t' * A + b(t));
