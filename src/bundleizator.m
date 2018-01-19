@@ -1,7 +1,9 @@
-function u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
+function [u_star, iterations] = bundleizator(X, y, C, kernel, loss, dloss, precision, varargin)
 %BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
 % SYNOPSIS: u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
+%           [u_star, iterations] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+%           [...] = bundleizator(X, y, C, kernel, loss, dloss, precision, gram_svd_threshold)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -12,13 +14,25 @@ function u_star = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %         arguments the sample target y and the scalar product f = <w,x>
 % - dloss: a subgradient of the loss function with respect to f
 % - precision: the required distance from optimality
+% - gram_svd_threshold: all the singular values of the Gram matrix below
+%                       this threshold are discarded (optional, default 1e-6)
 %
 % OUTPUT:
 % - u_star: the optimal values for the coefficients of the linear
 %           combination of support vectors
+% - iterations: the number of optimization loop iterations done
 
 %% Initialization
 num_samples = size(X, 1);
+
+if length(varargin) > 0
+    gram_svd_threshold = varargin{1};
+else
+    gram_svd_threshold = 1e-6;
+end
+
+% Optimization subproblem options
+quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
 % Compunte the Gram matrix
 G = zeros(num_samples);
@@ -35,8 +49,8 @@ end
 % Compute the reduced SVD of G
 % this is necessary for inverse operations since G is ill-conditioned
 [GU,GS,GV] = svd(G);
-% discard all singular values below precision
-Gselector = diag(GS) > 1e-6;
+% discard all singular values below threshold
+Gselector = diag(GS) >= gram_svd_threshold;
 sGS = GS(Gselector,Gselector);
 sGU = GU(:,Gselector);
 sGV = GV(:,Gselector);
@@ -64,7 +78,7 @@ while true
     for i = 1:num_samples
         vdloss(i) = dloss(f(i), y(i));
     end
-    A(:,t+1) = G * vdloss;
+    A(:,t+1) = G * vdloss / num_samples;
     
     % Update b_t
     Remp = 0;
@@ -72,18 +86,19 @@ while true
         Remp = Remp + loss(f(i), y(i));
     end
     Remp = Remp / num_samples;
-    b(t+1) = Remp - A(:,t+1)' * u_t;
+    b(t+1,1) = Remp - A(:,t+1)' * u_t;
     
     % Evaluate J_t+1 at point u_t
-    R_t1 = max(u_t' * A + b(t+1));
+    R_t1 = max(u_t' * A + b');
     J_t1 = 1/C * (u_t' * G * u_t) + R_t1;
     %J_t1 = (u_t' * G * u_t) + C * Remp;
     
     % Compute epsilon
     Jmin = min(Jmin, J_t1);
     epsilon = Jmin - J_t;
-
-    fprintf('t = %d \t Remp = %f \t e_t %f \n', t, Remp, epsilon);
+    
+    % Output iteration status
+    fprintf('t = %d\t Remp = %e\t J = %e\t e_t = %e\n', t, Remp, J_t1, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
@@ -99,7 +114,7 @@ while true
     t = t + 1;
     
     % Solve the dual of the quadratic subproblem
-    z_t = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1);
+    z_t = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1, [], [], [], quadprog_options);
     % Get optimal point thru dual connection
     % u_t = -0.5 * C * (G \ (A * z_t));
     u_t = -0.5 * C * (sGV * (sGS \ (sGU' * (A * z_t))));
@@ -111,5 +126,10 @@ end
 
 % Optimal value of u
 u_star = u_t;
+
+% Number of iterations, if required
+if nargout == 2
+    iterations = t;
+end
 
 end
