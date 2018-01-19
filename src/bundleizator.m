@@ -77,10 +77,13 @@ while true
     % Evaluate J_t+1 at point u_t
     R_t1 = max(u_t' * A + b(t+1));
     J_t1 = 1/C * (u_t' * G * u_t) + R_t1;
+    %J_t1 = (u_t' * G * u_t) + C * Remp;
     
     % Compute epsilon
     Jmin = min(Jmin, J_t1);
     epsilon = Jmin - J_t;
+
+    fprintf('t = %d \t Remp = %f \t e_t %f \n', t, Remp, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
@@ -102,7 +105,7 @@ while true
     u_t = -0.5 * C * (sGV * (sGS \ (sGU' * (A * z_t))));
     
     % Evaluate J at point u
-    R_t = max(u_t' * A + b(t));
+    R_t = max(u_t' * A + b');
     J_t = 1/C * (u_t' * G * u_t) + R_t;
 end
 
