@@ -25,7 +25,7 @@ function [u_star, iterations] = bundleizator(X, y, C, kernel, loss, dloss, preci
 %% Initialization
 num_samples = size(X, 1);
 
-if length(varargin) > 0
+if ~isempty(varargin)
     gram_svd_threshold = varargin{1};
 else
     gram_svd_threshold = 1e-6;
@@ -34,17 +34,8 @@ end
 % Optimization subproblem options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
-% Compunte the Gram matrix
-G = zeros(num_samples);
-for i = 1:num_samples
-    j = 1;
-    while j < i
-        G(i,j) = kernel(X(i,:), X(j,:));
-        G(j,i) = G(i,j);
-        j = j + 1;
-    end
-    G(i,i) = kernel(X(i,:), X(i,:));
-end
+% Compute the Gram matrix
+G = gram_matrix(X, kernel);
 
 % Compute the reduced SVD of G
 % this is necessary for inverse operations since G is ill-conditioned
@@ -124,10 +115,12 @@ while true
     J_t = 1/C * (u_t' * G * u_t) + R_t;
 end
 
+%% Function outputs
+
 % Optimal value of u
 u_star = u_t;
 
-% Number of iterations, if required
+% Number of iterations, if requested
 if nargout == 2
     iterations = t;
 end
