@@ -98,7 +98,7 @@ while true
     epsilon = Jmin - J_t;
     
     % Output iteration status
-    fprintf('t = %d\t Remp = %e\t J = %e\t e_t = %e\n', t, Remp, J_t1, epsilon);
+    fprintf('C = %e t = %d\t Remp = %e\t J = %e\t e_t = %e\n', C, t, Remp, J_t1, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
