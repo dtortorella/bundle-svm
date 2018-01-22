@@ -1,7 +1,7 @@
-function [kernel, nu] = svm_select_model_bayesianly(features, classes, folds, kernels)
-% SVM_SELECT_MODEL_BAYESIANLY Selects the hyperparameters of a n-SVM via cross-validation
+function [kernel, C] = svm_select_model_bayesianly(features, classes, folds, kernels)
+% SVM_SELECT_MODEL_BAYESIANLY Selects the hyperparameters of a SVM via cross-validation
 %
-% SYNOPSIS: [kernel, nu] = svm_select_model_bayesianly(features, classes, folds, kernels)
+% SYNOPSIS: [kernel, C] = svm_select_model_bayesianly(features, classes, folds, kernels)
 %
 % INPUT:
 % - features: a matrix containing one sample feature vector per row
@@ -11,21 +11,21 @@ function [kernel, nu] = svm_select_model_bayesianly(features, classes, folds, ke
 %
 % OUTPUT:
 % - kernel: the best kernel function selected
-% - nu: the best value selected for this hyperparameter
+% - C: the best value selected for this hyperparameter
 %
 % REMARKS This implementation uses bayesian optimization to find the best settings
 %
 % SEE ALSO svm_select_model, svr_select_model_bayesianly
 
     parameter_kernel = optimizableVariable('kernel', kernels.keys, 'Type', 'categorical');
-    parameter_nu = optimizableVariable('nu', [0.1,min(max_feasible_nu(classes, folds))], 'Type', 'real');
+    parameter_C = optimizableVariable('C', [1e-3,1e5], 'Type', 'real');
     objective_function = @(x) crossvalidation_error(features, classes, folds, kernels, x);
     
-    result = bayesopt(objective_function, [parameter_kernel, parameter_nu], 'MaxObjectiveEvaluations', 50);
+    result = bayesopt(objective_function, [parameter_kernel, parameter_C], 'MaxObjectiveEvaluations', 50);
     hyperparameters = table2struct(result.XAtMinObjective);
     
     kernel = hyperparameters.kernel;
-    nu = hyperparameters.nu;
+    C = hyperparameters.C;
 end
 
 function inaccuracy = crossvalidation_error(features, classes, folds, kernels, hyperparameters)
@@ -41,7 +41,7 @@ function inaccuracy = crossvalidation_error(features, classes, folds, kernels, h
         validation_features = features((dataset_partition == fold_index),:);
         validation_classes = classes((dataset_partition == fold_index),:);
         % train and estimate the validation accuracy for this partition
-        model = svm_train(training_features, training_classes, kernels(char(hyperparameters.kernel)), hyperparameters.nu);
+        model = svm_train(training_features, training_classes, kernels(char(hyperparameters.kernel)), hyperparameters.C);
         if isstruct(model)
             predictions = svm_predict(model, validation_features);
             validation_error(fold_index) = sum(predictions ~= validation_classes) / length(validation_classes);

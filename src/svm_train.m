@@ -1,18 +1,19 @@
-function model = svm_train(features, classes, kernel, nu)
+function model = svm_train(features, classes, kernel, C, algorithm, varargin)
 % SVM_TRAIN Trains a support vector machine for classification
 %
-% SYNOPSIS: model = svm_train(features, classes, kernel, nu)
+% SYNOPSIS: model = svm_train(features, classes, kernel, C, algorithm)
+%           model = svm_train(features, classes, kernel, C, 'bundleizator', precision)
 %
 % INPUT:
 % - features: a matrix containing one sample feature vector per row
 % - classes: a column vector containing one sample class per entry, must be +/-1
 % - kernel: a function that computes the scalar product of two vectors in feature space
-% - nu: hyperparameter, fraction of support vectors (between 0 and 1)
+% - C: hyperparameter, a non-negative regularization constant
+% - algorithm: which implementation to use (bundleizator/libsvm)
+% - precision: the required distance from optimality (optional, only for bundleizator)
 %
 % OUTPUT:
-% - model: a structure representing a n-SVM model
-%
-% REMARKS The optimization algorithm is based on bundle methods
+% - model: a structure representing the SVM model for this algorithm
 %
 % SEE ALSO svr_train, svm_predict
 
@@ -32,8 +33,17 @@ function model = svm_train(features, classes, kernel, nu)
 %   -t k   sets the k-th kernel function type as descripted above
 % see libsvmtrain for more information 
 
-options = sprintf('-s 1 -n %f %s -q', nu, kernel);
-
-model = libsvmtrain(classes, features, options);
+if algorithm == 'bundleizator'
+    model.X = features;
+    model.kernel = kernel;
+    if isempty(varargin)
+        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss);
+    else
+        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, varargin{1});
+    end
+elseif algorithm == 'libsvm'
+    options = sprintf('-s 0 -c %f %s -q', C, kernel);
+    model = libsvmtrain(classes, features, options);
+end
 
 end

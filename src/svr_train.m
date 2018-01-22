@@ -1,20 +1,20 @@
-function [model, epsilon] = svr_train(inputs, outputs, kernel, nu, C)
+function model = svr_train(inputs, outputs, kernel, C, epsilon, algorithm, varargin)
 % SVR_TRAIN Trains a support vector machine for regression
 %
-% SYNOPSIS: [model, epsilon] = svr_train(inputs, outputs, kernel, nu, C)
+% SYNOPSIS: model = svr_train(inputs, outputs, kernel, C, epsilon, algorithm)
+%           model = svr_train(inputs, outputs, kernel, C, epsilon, 'bundleizator', precision)
 %
 % INPUT:
 % - inputs: a matrix containing one input sample per row
 % - outputs: a column vector containing one output sample per entry
 % - kernel: a function that computes the scalar product of two vectors in feature space
-% - nu: hyperparameter, fraction of support vectors (between 0 and 1)
 % - C: hyperparameter, a non-negative regularization constant
+% - epsilon: hyperparameter, for the epsilon-insensitive loss
+% - algorithm: which implementation to use (bundleizator/libsvm)
+% - precision: the required distance from optimality (optional, only for bundleizator)
 %
 % OUTPUT:
-% - model: a structure representing a n-SVR model
-% - epsilon: the accuracy of the model (as in an e-SVR)
-%
-% REMARKS The optimization algorithm is based on bundle methods
+% - model: a structure representing the SVR model for this algorithm
 %
 % SEE ALSO svm_train, svr_predict
 
@@ -34,13 +34,19 @@ function [model, epsilon] = svr_train(inputs, outputs, kernel, nu, C)
 %   -c C   sets the C hyperparameter to C 
 %   -t k   sets the k-th kernel function type as descripted above
 
-options = sprintf('-s 4 -n %f -c %f -t %d -q ', nu, C, kernel);
-
-model = libsvmtrain(outputs, inputs, options);
-
-%by now i'm randomly choosing an epsilon value, based on the upperbound
-%given by nu becouse i can't figure it out how to retrieve it from the
-%model. libsvmpredict returns an 'epsilon' value btw...
-epsilon = rand * nu; %(it's weird , i know, but 'rand' is actually a function call)
+if algorithm == 'bundleizator'
+    model.X = inputs;
+    model.kernel = kernel;
+    if isempty(varargin)
+        model.u = bundleizator(inputs, outputs, C, kernel, ...
+            @(f,y) einsensitive_loss(f, y, epsilon), @(f,y) einsensitive_dloss(f, y, epsilon));
+    else
+        model.u = bundleizator(inputs, outputs, C, kernel, ...
+            @(f,y) einsensitive_loss(f, y, epsilon), @(f,y) einsensitive_dloss(f, y, epsilon), varargin{1});
+    end
+elseif algorithm == 'libsvm'
+    options = sprintf('-s 3 -c %f -p %f %s -q ', C, epsilon, kernel);
+    model = libsvmtrain(outputs, inputs, options);
+end
 
 end
