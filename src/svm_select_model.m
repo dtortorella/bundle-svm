@@ -1,7 +1,8 @@
 function [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, algorithm, varargin)
 % SVM_SELECT_MODEL Selects the hyperparameters of a SVM via cross-validation
 %
-% SYNOPSIS: [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range)
+% SYNOPSIS: [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, algorithm)
+%           [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, 'bundleizator', precision)
 %
 % INPUT:
 % - features: a matrix containing one sample feature vector per row
