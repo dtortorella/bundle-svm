@@ -13,13 +13,13 @@ function classes = svm_predict(model, features, algorithm)
 %
 % SEE ALSO svm_train
 
-if algorithm == 'bundleizator'
+if strcmp(algorithm, 'bundleizator')
     num_samples = size(features, 1);
     classes = zeros(num_samples, 1);
     for i = 1:num_samples
         classes(i) = bundleizator_classify(features(i,:), model.X, model.kernel, model.u);
     end
-elseif algorithm == 'libsvm'
+elseif strcmp(algorithm, 'libsvm')
     %dirty workarounnd passing a zero vector as labels, since libscvpredict do
     %want some testlabel
     classes = libsvmpredict(ones(length(features),1), features, model, '-q');
