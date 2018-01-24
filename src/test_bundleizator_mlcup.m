@@ -12,10 +12,10 @@ set(gca,'XScale','log');
 %hold on;
 grid on;
 
-for j = 1:length(epsilon)
-    for k = 1:length(C)
+for k = 1:length(C)
+    for j = 1:length(epsilon)
 
-        [u, iters(j,k)] = bundleizator(X, y, C(k), kernel, @(f,y) einsensitive_loss(f, y, epsilon(j)), @(f,y) einsensitive_dloss(f, y, epsilon(j)), bundle_precision, 1e-12);
+        [u, iters(j,k)] = bundleizator(X, y, C(k), kernel, @(f,y) einsensitive_loss(f, y, epsilon(j)), @(f,y) einsensitive_dloss(f, y, epsilon(j)), bundle_precision);
 
         %% Training accuracy
 
@@ -37,16 +37,16 @@ for j = 1:length(epsilon)
 
         %% Plot
 
-%        subplot(2,1,1);
+        subplot(2,1,1);
         surf(C, epsilon, acc,'FaceColor', 'interp');
-        %plot3(C, epsilon, acc, 'b.', 'r.');
-        %set(gca,'YScale','log');
+        %plot3(C, epsilon, acc, 'b.', ');
+        set(gca,'XScale','log');
         grid on;
 
-%         subplot(2,1,2);
-%         surf(C, epsilon, acc_test,'FaceColor', 'interp');
-%         grid on;
-%         set(gca,'YScale','log');
+        subplot(2,1,2);
+        surf(C, epsilon, acc_test,'FaceColor', 'interp');
+        grid on;
+        set(gca,'XScale','log');
         drawnow;
        
     end
