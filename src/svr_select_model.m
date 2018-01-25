@@ -1,8 +1,8 @@
-function [kernel, C, epsilon, mean_validation_mee, devi_validation_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm, varargin)
+function [kernel, C, epsilon, best_mee, mean_validation_mee, devi_validation_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm, varargin)
 % SVR_SELECT_MODEL Selects the hyperparameters of a SVR via cross-validation
 %
-% SYNOPSIS: [kernel, C, epsilon] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm)
-%           [kernel, C, epsilon] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, 'bundleizator', precision)
+% SYNOPSIS: [kernel, C, epsilon, best_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm)
+%           [kernel, C, epsilon, best_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, 'bundleizator', precision)
 %
 % INPUT:
 % - inputs: a matrix containing one input sample per row
@@ -18,12 +18,16 @@ function [kernel, C, epsilon, mean_validation_mee, devi_validation_mee] = svr_se
 % - kernel: the best kernel function selected
 % - C: the best value selected for this hyperparameter
 % - epsilon: the best value selected for this hyperparameter
+% - best_mee: exactly what you expect it is
 %
 % REMARKS This implementation uses a grid search to find the optimal settings
 %
 % SEE ALSO svm_select_model, svr_train, svr_predict
 
 best_mee = +Inf;
+best_mees = containers.Map(kernels.keys, repmat(+Inf, 1, kernels.Count));
+Cs = containers.Map(kernels.keys, zeros(1, kernels.Count));
+epsilons = containers.Map(kernels.keys, zeros(1, kernels.Count));
 dataset_partition = kfolds_partition(size(inputs, 1), folds);
 
 for kernel_index = kernels.keys
@@ -42,9 +46,7 @@ for kernel_index = kernels.keys
 
     % try different values of the hyperparameters
     for i = 1:length(C_range)
-        fprintf('\nC = %f, eps = ', C_range(i));
         for j = 1:length(epsilon_range)
-            fprintf('%f ', epsilon_range(j));
             
             % keeps the validation MEE for each fold
             validation_mee = zeros(1, folds);
@@ -78,14 +80,24 @@ for kernel_index = kernels.keys
             set(gca, 'XScale', 'log');
             drawnow;
 
-            if mean_validation_mee(i,j) < best_mee
-                % we've found a new better model from these hyperparameter settings
-                best_mee = mean_validation_mee(i,j);
+            if mean_validation_mee(i,j) < best_mees(kernel_index{1})
+                % we've found better hyperparameter settings for this kernel
+                best_mees(kernel_index{1}) = mean_validation_mee(i,j);
                 kernel = kernels(kernel_index{1});
-                C = C_range(i);
-                epsilon = epsilon_range(j);
+                Cs(kernel_index{1}) = C_range(i);
+                epsilons(kernel_index{1}) = epsilon_range(j);
             end
         end
+    end
+    
+    fprintf('Kernel: %s, C: %e, epsilon: %f, MEE: %f\n', kernel_index{1}, Cs(kernel_index{1}), epsilons(kernel_index{1}), best_mees(kernel_index{1}));
+    
+    if best_mees(kernel_index{1}) > best_mee
+        % we've found a better performance on this kernel
+        best_mee = best_mees(kernel_index{1});
+        kernel = kernel_index{1};
+        C = Cs(kernel_index{1});
+        epsilon = epsilons(kernel_index{1});
     end
 end
       

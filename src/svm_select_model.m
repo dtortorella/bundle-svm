@@ -1,8 +1,8 @@
-function [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, algorithm, varargin)
+function [kernel, C, best_accuracy] = svm_select_model(features, classes, folds, kernels, C_range, algorithm, varargin)
 % SVM_SELECT_MODEL Selects the hyperparameters of a SVM via cross-validation
 %
-% SYNOPSIS: [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, algorithm)
-%           [kernel, C] = svm_select_model(features, classes, folds, kernels, C_range, 'bundleizator', precision)
+% SYNOPSIS: [kernel, C, best_accuracy] = svm_select_model(features, classes, folds, kernels, C_range, algorithm)
+%           [kernel, C, best_accuracy] = svm_select_model(features, classes, folds, kernels, C_range, 'bundleizator', precision)
 %
 % INPUT:
 % - features: a matrix containing one sample feature vector per row
@@ -16,12 +16,15 @@ function [kernel, C] = svm_select_model(features, classes, folds, kernels, C_ran
 % OUTPUT:
 % - kernel: the best kernel function selected
 % - C: the best value selected for this hyperparameter
+% - best_accuracy: exactly what you expect it is
 %
 % REMARKS This implementation uses a grid search to find the optimal settings
 %
 % SEE ALSO svr_select_model, svm_train, svm_predict
 
 best_accuracy = -Inf;
+best_accuracies = containers.Map(kernels.keys, repmat(-Inf, 1, kernels.Count));
+Cs = containers.Map(kernels.keys, zeros(1, kernels.Count));
 dataset_partition = kfolds_partition(size(features, 1), folds);
 
 for kernel_index = kernels.keys
@@ -66,12 +69,20 @@ for kernel_index = kernels.keys
         plot(try_C, mean_validation_accuracy, 'b.');
         drawnow;
 
-        if mean_validation_accuracy > best_accuracy
-            % we've found a new better model from these hyperparameter settings
-            best_accuracy = mean_validation_accuracy;
-            kernel = kernel_index{1};
-            C = try_C;
+        if mean_validation_accuracy > best_accuracies(kernel_index{1})
+            % we've found better hyperparameter settings for this kernel
+            best_accuracies(kernel_index{1}) = mean_validation_accuracy;
+            Cs(kernel_index{1}) = try_C;
         end
+    end
+    
+    fprintf('Kernel: %s, C: %e, accuracy: %f\n', kernel_index{1}, Cs(kernel_index{1}), best_accuracies(kernel_index{1}));
+    
+    if best_accuracies(kernel_index{1}) > best_accuracy
+        % we've found a better performance on this kernel
+        best_accuracy = best_accuracies(kernel_index{1});
+        kernel = kernel_index{1};
+        C = Cs(kernel_index{1});
     end
 end
 
