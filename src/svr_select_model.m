@@ -1,4 +1,4 @@
-function [kernel, C, epsilon, best_mee, mean_validation_mee, devi_validation_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm, varargin)
+function [kernel, C, epsilon, best_mee, Cs, epsilons] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm, varargin)
 % SVR_SELECT_MODEL Selects the hyperparameters of a SVR via cross-validation
 %
 % SYNOPSIS: [kernel, C, epsilon, best_mee] = svr_select_model(inputs, outputs, folds, kernels, C_range, epsilon_range, algorithm)

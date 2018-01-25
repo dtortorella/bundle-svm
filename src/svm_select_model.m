@@ -1,4 +1,4 @@
-function [kernel, C, best_accuracy] = svm_select_model(features, classes, folds, kernels, C_range, algorithm, varargin)
+function [kernel, C, best_accuracy, Cs] = svm_select_model(features, classes, folds, kernels, C_range, algorithm, varargin)
 % SVM_SELECT_MODEL Selects the hyperparameters of a SVM via cross-validation
 %
 % SYNOPSIS: [kernel, C, best_accuracy] = svm_select_model(features, classes, folds, kernels, C_range, algorithm)
