@@ -34,11 +34,12 @@ for kernel_index = kernels.keys
     % try different kernel functions
 
     % graph of the MEE function
-    figure;
+    fig = figure('Name', kernel_index{1});
     grid on;
     xlabel('C');
     ylabel('\epsilon');
     zlabel('MEE');
+    title(kernel_index{1});
     set(gca, 'XScale', 'log');
 
     mean_validation_mee = zeros(length(C_range), length(epsilon_range));
@@ -76,7 +77,13 @@ for kernel_index = kernels.keys
             mean_validation_mee(i,j) = mean(validation_mee);
             devi_validation_mee(i,j) = std(validation_mee, 1);
 
+            figure(fig);
             surf(C_range, epsilon_range, mean_validation_mee', devi_validation_mee', 'FaceColor', 'interp');
+            grid on;
+            xlabel('C');
+            ylabel('\epsilon');
+            zlabel('MEE');
+            title(kernel_index{1});
             set(gca, 'XScale', 'log');
             drawnow;
 

@@ -31,7 +31,7 @@ for kernel_index = kernels.keys
     % try different kernel functions
 
     % graph of the accuracy function
-    figure;
+    fig = figure('Name' , kernel_index{1});
     hold on;
     grid on;
     xlabel('C');
@@ -65,7 +65,9 @@ for kernel_index = kernels.keys
         end
 
         mean_validation_accuracy = mean(validation_accuracy);
+        figure(fig);
         errorbar(try_C, mean_validation_accuracy', std(validation_accuracy,1), 'c', 'CapSize', 0);
+        figure(fig);
         plot(try_C, mean_validation_accuracy, 'b.');
         drawnow;
 
