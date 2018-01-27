@@ -60,36 +60,35 @@ Jmin = Inf;
 A = [];
 b = [];
 H = [];
+vdloss = zeros(num_samples, 1);
 
 %% Optimization loop
 while true
-    % Update a_t
-    vdloss = zeros(num_samples, 1);
+    % Compute Remp and dloss at point u_t
+    Remp = 0;
     f = G * u_t;
     for i = 1:num_samples
         vdloss(i) = dloss(f(i), y(i));
-    end
-    A(:,t+1) = G * vdloss / num_samples;
-    
-    % Update b_t
-    Remp = 0;
-    for i = 1:num_samples
         Remp = Remp + loss(f(i), y(i));
     end
     Remp = Remp / num_samples;
+    
+    % Update a_t
+    A(:,t+1) = G * vdloss / num_samples;
+    
+    % Update b_t
     b(t+1,1) = Remp - A(:,t+1)' * u_t;
     
     % Evaluate J_t+1 at point u_t
     R_t1 = max(u_t' * A + b');
     J_t1 = 1/C * (u_t' * G * u_t) + R_t1;
-    %J_t1 = (u_t' * G * u_t) + C * Remp;
     
     % Compute epsilon
     Jmin = min(Jmin, J_t1);
     epsilon = Jmin - J_t;
     
     % Output iteration status
-    %fprintf('t = %d\t Remp = %e\t J = %e\t e_t = %e\n', t, Remp, J_t1, epsilon);
+    fprintf('t = %d\t Remp = %e\t J = %e\t e_t = %e\n', t, Remp, J_t1, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
