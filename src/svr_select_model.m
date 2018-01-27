@@ -99,7 +99,7 @@ for kernel_index = kernels.keys
     
     fprintf('Kernel: %s, C: %e, epsilon: %f, MEE: %f\n', kernel_index{1}, Cs(kernel_index{1}), epsilons(kernel_index{1}), best_mees(kernel_index{1}));
     
-    if best_mees(kernel_index{1}) > best_mee
+    if best_mees(kernel_index{1}) < best_mee
         % we've found a better performance on this kernel
         best_mee = best_mees(kernel_index{1});
         kernel = kernel_index{1};
