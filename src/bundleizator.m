@@ -15,12 +15,14 @@ function [u_star, iterations] = bundleizator(X, y, C, kernel, loss, dloss, preci
 % - dloss: a subgradient of the loss function with respect to f
 % - precision: the required distance from optimality
 % - gram_svd_threshold: all the singular values of the Gram matrix below
-%                       this threshold are discarded (optional, default 1e-6)
+%         this threshold are discarded (optional, default 1e-6)
 %
 % OUTPUT:
 % - u_star: the optimal values for the coefficients of the linear
 %           combination of support vectors
 % - iterations: the number of optimization loop iterations done
+%
+% SEE ALSO bundleizator_pruning, bundleizator_aggr
 
 %% Initialization
 num_samples = size(X, 1);
@@ -31,7 +33,7 @@ else
     gram_svd_threshold = 1e-6;
 end
 
-% Optimization subproblem options
+% Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
 % Compute the Gram matrix
@@ -73,10 +75,10 @@ while true
     end
     Remp = Remp / num_samples;
     
-    % Update a_t
+    % Compute a_t+1
     A(:,t+1) = G * vdloss / num_samples;
     
-    % Update b_t
+    % Compute b_t+1
     b(t+1,1) = Remp - A(:,t+1)' * u_t;
     
     % Evaluate J_t+1 at point u_t
@@ -88,7 +90,7 @@ while true
     epsilon = Jmin - J_t;
     
     % Output iteration status
-    fprintf('t = %d\t Remp = %e\t J = %e\t e_t = %e\n', t, Remp, J_t1, epsilon);
+    fprintf('t = %d\t Remp = %e\t J_t = %e\t J(u_t) = %e\t e_t = %e\n', t, Remp, J_t, J_t1, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
@@ -103,13 +105,13 @@ while true
     % Increment step
     t = t + 1;
     
-    % Solve the dual of the quadratic subproblem
+    % Solve the dual of the quadratic master problem
     z_t = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1, [], [], [], quadprog_options);
     % Get optimal point thru dual connection
     % u_t = -0.5 * C * (G \ (A * z_t));
     u_t = -0.5 * C * (sGV * (sGS \ (sGU' * (A * z_t))));
     
-    % Evaluate J at point u
+    % Evaluate J_t at point u_t
     R_t = max(u_t' * A + b');
     J_t = 1/C * (u_t' * G * u_t) + R_t;
 end
