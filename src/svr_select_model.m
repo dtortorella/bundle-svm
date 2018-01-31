@@ -23,6 +23,8 @@ function [kernel, C, epsilon, best_mee, Cs, epsilons] = svr_select_model(inputs,
 % REMARKS This implementation uses a grid search to find the optimal settings
 %
 % SEE ALSO svm_select_model, svr_train, svr_predict
+dir =  sprintf('./testdata/svr_model_select/%s',char(datetime()));
+mkdir(dir);
 
 best_mee = +Inf;
 best_mees = containers.Map(kernels.keys, repmat(+Inf, 1, kernels.Count));
@@ -35,15 +37,18 @@ for kernel_index = kernels.keys
 
     % graph of the MEE function
     fig = figure('Name', kernel_index{1});
-    grid on;
-    xlabel('C');
-    ylabel('\epsilon');
-    zlabel('MEE');
-    title(kernel_index{1});
-    set(gca, 'XScale', 'log');
-
-    mean_validation_mee = zeros(length(C_range), length(epsilon_range));
-    devi_validation_mee= zeros(length(C_range), length(epsilon_range));
+    ax = gca;
+    
+    filename = sprintf('%s/%s.mat', dir, kernel_index{1});
+    
+    save(filename, 'algorithm', 'C_range', 'epsilon_range');
+    if ~isempty(varargin)
+          v = varargin{1};
+          save(filename, 'v', '-append');
+    end
+    
+    mean_validation_mee = zeros(length(epsilon_range), length(C_range));
+    devi_validation_mee= zeros(length(epsilon_range), length(C_range));
 
     % try different values of the hyperparameters
     for i = 1:length(C_range)
@@ -74,30 +79,39 @@ for kernel_index = kernels.keys
                 validation_mee(fold_index) = sum(sqrt(sum(((predictions - validation_outputs) .^ 2), 2))) / length(validation_outputs);
             end
             
-            mean_validation_mee(i,j) = mean(validation_mee);
-            devi_validation_mee(i,j) = std(validation_mee, 1);
+            mean_validation_mee(j,i) = mean(validation_mee);
+            devi_validation_mee(j,i) = std(validation_mee, 1);
 
-            figure(fig);
-            surf(C_range, epsilon_range, mean_validation_mee', devi_validation_mee', 'FaceColor', 'interp');
+            save(filename, 'mean_validation_mee', 'devi_validation_mee', '-append');
+            
+            surf(ax, C_range, epsilon_range, mean_validation_mee, devi_validation_mee, 'FaceColor', 'interp');
             grid on;
             xlabel('C');
             ylabel('\epsilon');
             zlabel('MEE');
             title(kernel_index{1});
-            set(gca, 'XScale', 'log');
+            set(ax, 'XScale', 'log');
             drawnow;
 
-            if mean_validation_mee(i,j) < best_mees(kernel_index{1})
+            if mean_validation_mee(j,i) < best_mees(kernel_index{1})
                 % we've found better hyperparameter settings for this kernel
-                best_mees(kernel_index{1}) = mean_validation_mee(i,j);
-                kernel = kernels(kernel_index{1});
+                best_mees(kernel_index{1}) = mean_validation_mee(j,i);
                 Cs(kernel_index{1}) = C_range(i);
                 epsilons(kernel_index{1}) = epsilon_range(j);
+                save(filename, 'best_mees', 'Cs', 'epsilons', '-append')
             end
         end
     end
     
     fprintf('Kernel: %s, C: %e, epsilon: %f, MEE: %f\n', kernel_index{1}, Cs(kernel_index{1}), epsilons(kernel_index{1}), best_mees(kernel_index{1}));
+    figure('Name', kernel_index{1});
+    contour(C_range, epsilon_range, mean_validation_mee, 'ShowText', 'on', 'LineColor','black');
+    ylabel('\epsilon');
+    xlabel('C');
+    set(gca, 'XScale', 'log');
+    hold on;
+    plot(Cs(kernel_index{1}), epsilons(kernel_index{1}), 'd', 'MarkerFaceColor', 'b');
+    hold off;
     
     if best_mees(kernel_index{1}) < best_mee
         % we've found a better performance on this kernel
@@ -105,7 +119,9 @@ for kernel_index = kernels.keys
         kernel = kernel_index{1};
         C = Cs(kernel_index{1});
         epsilon = epsilons(kernel_index{1});
+        save(sprintf('%s/best.mat', dir), 'best_mee', 'kernel', 'C', 'epsilon');
     end
+    
 end
       
 end
