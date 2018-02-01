@@ -32,9 +32,9 @@ if strcmp(algorithm, 'bundleizator')
     model.X = features;
     model.kernel = kernel;
     if isempty(varargin)
-        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, 1e-6);
+        model.u = bundleizator_pruning(features, classes, C, kernel, @hinge_loss, @hinge_dloss, 1e-6, 50, 1e-7);
     else
-        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, varargin{1});
+        model.u = bundleizator_pruning(features, classes, C, kernel, @hinge_loss, @hinge_dloss, varargin{1}, 50, 1e-7);
     end
 elseif strcmp(algorithm, 'libsvm')
     options = sprintf('-s 0 -c %f %s -q', C, kernel);
