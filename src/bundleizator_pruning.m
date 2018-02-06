@@ -1,9 +1,8 @@
-function [u, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold, varargin)
+function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 % BUNDLEIZATOR_PRUNING Implements a bundle method that solves a generic SVM, with subgradient pruning
 %
-% SYNOPSIS: u = bundleizator(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
-%           [u, t] = bundleizator(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
-%           [...] = bundleizator(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold, gram_svd_threshold)
+% SYNOPSIS: [u, sv] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+%           [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -18,46 +17,36 @@ function [u, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, pr
 %         inactive in the master problem before being discarded
 % - inactive_zero_threshold: subgradients with multiplier below this
 %         threshold will be considered inactive in the current iteration
-% - gram_svd_threshold: all the singular values of the Gram matrix below
-%         his threshold are discarded (optional, default 1e-6)
 %
 % OUTPUT:
 % - u: the optimal values for the coefficients of the linear
 %           combination of support vectors
+% - sv: the indices in X of the support vectors
 % - t: the number of optimization loop iterations done
+% - epsilon: precision reached in the last iteration
 %
 % REMARKS Suggested paramters for pruining are 50, 10^-7.
 %
-% SEE ALSO bundleizator, bundleizator_aggr
+% SEE ALSO bundleizator
 
 %% Initialization
 num_samples = size(X, 1);
 
-if ~isempty(varargin)
-    gram_svd_threshold = varargin{1};
-else
-    gram_svd_threshold = 1e-6;
-end
-
 % Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
-% Compute the Gram matrix
+% Get the SVs, and compute Gram matrices
 G = gram_matrix(X, kernel);
+sv = select_support_vectors(G);
 
-% Compute the truncated SVD of G
-% this is necessary for inverse operations since G is ill-conditioned
-[GU,GS,GV] = svd(G);
-% discard all singular values below threshold
-Gselector = diag(GS) >= gram_svd_threshold;
-sGS = GS(Gselector,Gselector);
-sGU = GU(:,Gselector);
-sGV = GV(:,Gselector);
+GX = G(:,sv);
+G = G(sv,sv);
+
+num_sv = length(sv);
 
 %% Zero-th step
 t = 0;
-dim = 0;
-u = zeros(num_samples,1);
+u = zeros(num_sv,1);
 
 % Compute Remp at point u_0
 Remp = 0;
@@ -88,41 +77,35 @@ while true
         vdloss(i) = dloss(f(i), y(i));
     end
     
-    % A(:,t) = G * vdloss / num_samples; 
-    A(:,end+1) = (sGU * (sGS * (sGV' * vdloss))) / num_samples;
+    A(:,end+1) = GX' * vdloss / num_samples;
     
     % Compute b_t
     b(end+1,1) = Remp - A(:,end)' * u;
     
     % Update H
-    % h = (A(:,t)' / G) * A;
-    h = (((A(:,end)' * sGV) / sGS) * sGU') * A;
+    h = (A(:,end)' / G) * A;
     H = [H, h(1:end-1)'; h];
     
     % Solve the dual of the quadratic master problem
     dim = length(b);
     z = quadprog(0.5 * C * H, -b, -eye(dim), zeros(dim,1), ones(1,dim), 1, [], [], [], quadprog_options);
     % Get optimal point thru dual connection
-    % u_t = -0.5 * C * (G \ (A * z_t));
-    u = -0.5 * C * (sGV * (sGS \ (sGU' * (A * z))));
+    u = -0.5 * C * (G \ (A * z));
 
     % Compute Remp at point u_t
     Remp = 0;
-    % f = G * u;
-    f = (sGU * (sGS * (sGV' * u)));
+    f = GX * u;
     for i = 1:num_samples
         Remp = Remp + loss(f(i), y(i));
     end
     Remp = Remp / num_samples;
     
     % Compute J(u_t)
-    % J =  1/C * (u' * G * u) + Remp;
-    J =  1/C * (u' * (sGU * (sGS * (sGV' * u)))) + Remp;
+    J =  1/C * (u' * G * u) + Remp;
     
     % Evaluate J_t at point u_t
     R_t = max(u' * A + b');
-    % J_t = 1/C * (u' * G * u) + R_t;
-    J_t =  1/C * (u' * (sGU * (sGS * (sGV' * u)))) + R_t;
+    J_t = 1/C * (u' * G * u) + R_t;
     
     % Compute epsilon
     Jmin = min(Jmin, J);
