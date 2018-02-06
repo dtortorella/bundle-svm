@@ -1,5 +1,5 @@
 function [u, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision, varargin)
-%BUNDLEIZATOR Implements a bundle method that solves a generic SVM
+% BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
 % SYNOPSIS: u = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %           [u, t] = bundleizator(X, y, C, kernel, loss, dloss, precision)
@@ -39,11 +39,10 @@ quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 % Compute the Gram matrix
 G = gram_matrix(X, kernel);
 
-% Compute the reduced SVD of G
+% Compute the truncated SVD of G
 % this is necessary for inverse operations since G is ill-conditioned
 [GU,GS,GV] = svd(G);
 % discard all singular values below threshold
-
 Gselector = diag(GS) >= gram_svd_threshold;
 sGS = GS(Gselector,Gselector);
 sGU = GU(:,Gselector);
@@ -73,7 +72,7 @@ vdloss = zeros(num_samples, 1);
 %% Optimization loop
 while true
     % Increment step
-    t = t +1;
+    t = t + 1;
     
     % Compute a_t
     % compute dloss at point u_t-1
@@ -127,7 +126,6 @@ while true
     if epsilon <= precision
         break
     end
-    
 end
 
 end
