@@ -30,17 +30,17 @@ function model = svr_train(inputs, outputs, kernel, C, epsilon, algorithm, varar
 % see libsvmtrain for more information
 
 if strcmp(algorithm, 'bundleizator')
-    model.X = inputs;
     model.kernel = kernel;
     if isempty(varargin)
-        model.u = bundleizator_pruning(inputs, outputs, C, kernel, ...
+        [model.u, sv] = bundleizator_pruning(inputs, outputs, C, kernel, ...
             @(f,y) einsensitive_loss(f, y, epsilon), @(f,y) einsensitive_dloss(f, y, epsilon), 1e-6, ...
             50, 1e-7);
     else
-        model.u = bundleizator_pruning(inputs, outputs, C, kernel, ...
+        [model.u, sv] = bundleizator_pruning(inputs, outputs, C, kernel, ...
             @(f,y) einsensitive_loss(f, y, epsilon), @(f,y) einsensitive_dloss(f, y, epsilon), varargin{1}, ...
             50, 1e-7);
     end
+    model.X = inputs(sv,:);
 elseif strcmp(algorithm, 'libsvm')
     options = sprintf('-s 3 -c %f -p %f %s -q ', C, epsilon, kernel);
     model = libsvmtrain(outputs, inputs, options);

@@ -31,7 +31,7 @@ quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
 % Get the SVs, and compute Gram matrices
 G = gram_matrix(X, kernel);
-sv = select_support_vectors(G);
+sv = select_span_vectors(G);
 
 GX = G(:,sv);
 G = G(sv,sv);

@@ -1,7 +1,7 @@
-function sv = select_support_vectors(G)
-% SELECT_SUPPORT_VECTORS Selects a subset of the set of samples sufficient to generate w
+function sv = select_span_vectors(G)
+% SELECT_SPAN_VECTORS Selects a subset of the set of samples sufficient to generate w
 %
-% SYNOPSIS: sv = select_support_vectors(G)
+% SYNOPSIS: sv = select_span_vectors(G)
 %
 % INPUT:
 % - G: the matrix of products of sample vectors in feature space, via the
