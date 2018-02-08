@@ -1,8 +1,8 @@
-function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+function [u, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 % BUNDLEIZATOR_PRUNING Implements a bundle method that solves a generic SVM, with subgradient pruning
 %
-% SYNOPSIS: [u, sv] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
-%           [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+% SYNOPSIS: [u] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+%           [u, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -20,8 +20,7 @@ function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss
 %
 % OUTPUT:
 % - u: the optimal values for the coefficients of the linear
-%           combination of support vectors
-% - sv: the indices in X of the support vectors
+%           combination of sample vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
 %
@@ -32,21 +31,18 @@ function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss
 %% Initialization
 num_samples = size(X, 1);
 
+% Compute Gram matrices
+G = gram_matrix(X, kernel);
+
 % Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
-
-% Get the SVs, and compute Gram matrices
-G = gram_matrix(X, kernel);
-sv = select_span_vectors(G);
-
-GX = G(:,sv);
-G = G(sv,sv);
-
-num_sv = length(sv);
+H = 2/C * [0 zeros(1, num_samples); zeros(num_samples, 1) G];
+h = [1 zeros(1, num_samples)];
+Aineq = [];
 
 %% Zero-th step
 t = 0;
-u = zeros(num_sv,1);
+u = zeros(num_samples,1);
 
 % Compute Remp at point u_0
 Remp = 0;
@@ -62,7 +58,6 @@ Jmin = Remp;
 % variables initialization
 A = [];
 b = [];
-H = [];
 vdloss = zeros(num_samples, 1);
 inactive_count = [];
 
@@ -77,24 +72,21 @@ while true
         vdloss(i) = dloss(f(i), y(i));
     end
     
-    A(:,end+1) = GX' * vdloss / num_samples;
+    A(:,t) = G * vdloss / num_samples;
     
     % Compute b_t
-    b(end+1,1) = Remp - A(:,end)' * u;
+    b(t,1) = Remp - A(:,t)' * u;
     
-    % Update H
-    h = (A(:,end)' / G) * A;
-    H = [H, h(1:end-1)'; h];
+    % Update Aineq
+    Aineq(end+1,:) = [-1 A(:,t)'];
     
-    % Solve the dual of the quadratic master problem
-    dim = length(b);
-    z = quadprog(0.5 * C * H, -b, -eye(dim), zeros(dim,1), ones(1,dim), 1, [], [], [], quadprog_options);
-    % Get optimal point thru dual connection
-    u = -0.5 * C * (G \ (A * z));
+    % Solve the prima of the quadratic master problem
+    [z, ~, ~, ~, mult] = quadprog(H, h, Aineq, -b, [], [], [], [], [], quadprog_options);
+    u = z(2:end,1);
 
     % Compute Remp at point u_t
     Remp = 0;
-    f = GX * u;
+    f = G * u;
     for i = 1:num_samples
         Remp = Remp + loss(f(i), y(i));
     end
@@ -112,7 +104,7 @@ while true
     epsilon = Jmin - J_t;
     
     % Output iteration status
-    fprintf('t = %d (%d subgradients)\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, dim, Jmin, J_t, epsilon);
+    fprintf('t = %d\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, Jmin, J_t, epsilon);
     
     % Halt when we reach the desired precision
     if epsilon <= precision
@@ -121,14 +113,14 @@ while true
 
     % Pruning
     % add new multiplier to inactive counting, update counts
-    inactive_count = [inactive_count 0] + (z' <= inactive_zero_threshold);
+    inactive_count = [inactive_count 0] + (mult.ineqlin' <= inactive_zero_threshold);
     % find which subgradients to keep
     keep = (inactive_count <= max_inactive_count);
     % discard inactive subgradients
     inactive_count = inactive_count(keep);
     A = A(:,keep);
     b = b(keep);
-    H = H(keep,keep);
+    Aineq = Aineq(keep,:);
 end
 
 end

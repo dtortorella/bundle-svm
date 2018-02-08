@@ -31,11 +31,11 @@ function model = svm_train(features, classes, kernel, C, algorithm, varargin)
 if strcmp(algorithm, 'bundleizator')
     model.kernel = kernel;
     if isempty(varargin)
-        [model.u, sv] = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, 1e-6);
+        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, 1e-6);
     else
-        [model.u, sv] = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, varargin{1});
+        model.u = bundleizator(features, classes, C, kernel, @hinge_loss, @hinge_dloss, varargin{1});
     end
-    model.X = features(sv,:);
+    model.X = features;
 elseif strcmp(algorithm, 'libsvm')
     options = sprintf('-s 0 -c %f %s -q', C, kernel);
     model = libsvmtrain(classes, features, options);

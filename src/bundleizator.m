@@ -1,8 +1,8 @@
-function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+function [u, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 % BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
-% SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
-%           [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+% SYNOPSIS: [u] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+%           [u, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -16,8 +16,7 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 %
 % OUTPUT:
 % - u: the optimal values for the coefficients of the linear
-%           combination of support vectors
-% - sv: the indices in X of the support vectors
+%           combination of training vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
 %
@@ -26,21 +25,18 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 %% Initialization
 num_samples = size(X, 1);
 
+% Compute Gram matrices
+G = gram_matrix(X, kernel);
+
 % Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
-
-% Get the SVs, and compute Gram matrices
-G = gram_matrix(X, kernel);
-sv = select_span_vectors(G);
-
-GX = G(:,sv);
-G = G(sv,sv);
-
-num_sv = length(sv);
+H = 2/C * [0 zeros(1, num_samples); zeros(num_samples, 1) G];
+h = [1 zeros(1, num_samples)];
+Aineq = [];
 
 %% Zero-th step
 t = 0;
-u = zeros(num_sv,1);
+u = zeros(num_samples,1);
 
 % Compute Remp at point u_0
 Remp = 0;
@@ -56,7 +52,6 @@ Jmin = Remp;
 % variables initialization
 A = [];
 b = [];
-H = [];
 vdloss = zeros(num_samples, 1);
 
 %% Optimization loop
@@ -70,23 +65,21 @@ while true
         vdloss(i) = dloss(f(i), y(i));
     end
     
-    A(:,t) = GX' * vdloss / num_samples;
+    A(:,t) = G * vdloss / num_samples;
     
     % Compute b_t
     b(t,1) = Remp - A(:,t)' * u;
     
-    % Update H
-    h = (A(:,t)' / G) * A;
-    H = [H, h(1:t-1)'; h];
+    % Update Aineq
+    Aineq = [Aineq; -1 A(:,t)'];
     
-    % Solve the dual of the quadratic master problem
-    z = quadprog(0.5 * C * H, -b, -eye(t), zeros(t,1), ones(1,t), 1, [], [], [], quadprog_options);
-    % Get optimal point thru dual connection
-    u = -0.5 * C * (G \ (A * z));
+    % Solve the prima of the quadratic master problem
+    z = quadprog(H, h, Aineq, -b, [], [], [], [], [], quadprog_options);
+    u = z(2:end,1);
 
     % Compute Remp at point u_t
     Remp = 0;
-    f = GX * u;
+    f = G * u;
     for i = 1:num_samples
         Remp = Remp + loss(f(i), y(i));
     end
