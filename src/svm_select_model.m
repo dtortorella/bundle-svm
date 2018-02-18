@@ -92,6 +92,11 @@ for kernel_index = kernels.keys
         devi_validation_accuracy(i) = std(validation_accuracy,1);
         
         %Compute the accuracy on the given test data (just for plots)
+        if isempty(varargin)
+            model = svm_train(train_features, train_classes, kernels(kernel_index{1}), try_C, algorithm);
+        else
+            model = svm_train(train_features, train_classes, kernels(kernel_index{1}), try_C, algorithm, varargin{1});
+        end
         prediction = svm_predict(model, test_features, algorithm);
         test_accuracy(i) = sum(prediction == test_classes)/length(test_classes);
         q0 = prediction == test_classes & test_classes == -1;
