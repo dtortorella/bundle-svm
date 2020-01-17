@@ -24,7 +24,7 @@ G = gram_norm_matrix(X, kernel);
 o = sum(abs(eye(size(G)) - G), 'all');
 
 % normalize by number of elements, if requested
-if nargin > 1 && strcmp(varargin{1}, 'normalize')
+if nargin > 2 && strcmp(varargin{1}, 'normalize')
     n = length(X) * (length(X) - 1);
     o = o / n;
 end
