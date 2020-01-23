@@ -22,16 +22,22 @@ else
 end
 
 switch lower(algorithm)
-case 'qr'
-    % QR with pivoting, with rank estimation provided by MATLAB
-    [~,~,p] = qr(G,0);
-    sv = p(1:rank(G));
-case 'srrqr'
-    % sRRQR by Gu & Eisenstat
-    [~,~,sv] = sRRQR(G, varargin{2}, varargin{3}, varargin{4});
-case 'svd'
-    % Online SVD update by Hoegaerts
-    error('Not implemented yet')
+    case 'qr'
+        % QR with pivoting, with rank estimation provided by MATLAB
+        [~,~,p] = qr(G,0);
+        sv = p(1:rank(G));
+    case 'srrqr'
+        % sRRQR by Gu & Eisenstat
+        [~,~,sv] = sRRQR(G, varargin{2}, varargin{3}, varargin{4});
+    case 'online_qr'
+        % repeat qr adding one sample at a time, estimating rank
+        [~,~,~,sv] = online_qr(G, varargin{2});
+    case 'online_svd'
+        % repeat svd arring one sample at a time, estmating rank
+        [~,~,~,sv] = online_svd(G,varargin{2});
+    case 'incremental_qr'
+    error('Not yet implemented')
+        
 otherwise
     error('Unknown algorithm')
 end
