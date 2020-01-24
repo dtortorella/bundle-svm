@@ -25,7 +25,7 @@ switch lower(algorithm)
     case 'qr'
         % QR with pivoting, with rank estimation provided by MATLAB
         [~,~,p] = qr(G,0);
-        sv = p(1:rank(G));
+        sv = p(:,1:rank(G));
     case 'srrqr'
         % sRRQR by Gu & Eisenstat
         [~,~,sv] = sRRQR(G, varargin{2}, varargin{3}, varargin{4});
