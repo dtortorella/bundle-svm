@@ -35,6 +35,12 @@ for i = 2:size(G,1)
         A = [A a'; a b];
         k = k+1;
         sv = [sv i];
+    else
+        [~,idx] = max(P(end,:)); %should be the index of the <tol sample
+        if idx ~= i 
+            sv(sv==idx) = i; %replace that sample with lastone. Should improve orthogonality
+            
+        end
     end
     
 end
