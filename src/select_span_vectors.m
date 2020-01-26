@@ -34,10 +34,7 @@ switch lower(algorithm)
         [~,~,~,sv] = online_qr(G, varargin{2});
     case 'online_svd'
         % repeat svd arring one sample at a time, estmating rank
-        [~,~,sv] = online_svd(G,varargin{2});
-    case 'incremental_qr'
-    error('Not yet implemented')
-        
+        [~,~,sv] = online_svd(G, varargin{2});
 otherwise
     error('Unknown algorithm')
 end

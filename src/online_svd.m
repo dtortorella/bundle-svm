@@ -1,4 +1,4 @@
-function [U,S,sv] = online_svd(G,tol)
+function [U,S,sv] = online_svd(G, tol)
 %ONLINE_SVD computes rank-m SVD of a Gram matrix estimating m 
 % using one sample at a time and repeated svd decomposition, selecting m
 % indipendent row/cols of the matrix G.
@@ -20,26 +20,19 @@ function [U,S,sv] = online_svd(G,tol)
 % See: matlab svd
 
 
-A = G(1,1);
+[U,S,~] = svd(G(1,1));
 sv = [1];
-k=1;
 
-for i = 2:size(G,1)
-    a = G(i,1:end-1);
-    a = a(sv);
-    b = G(i,i);
+for i = 2:size(G, 1)
+    % new decomposition
+    svi = [sv i];
+    [Ui,Si,~] = svd(G(svi,svi));
     
-    [U,S,V] = svd([A a'; a b]);
-    
-    if sum(abs(diag(S)) > tol) == k+1
-        %we added orthogonal information and use this sample
-        A = [A a'; a b];
-        k = k+1;
-        sv = [sv i];
+    if sum(abs(diag(S)) < tol) == 0
+        % all samples above threshold
+        U = Ui; S = Si;
+        sv = svi;
     end
-    
-end
 end
 
-
-
+end
