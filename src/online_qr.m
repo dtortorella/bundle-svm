@@ -29,7 +29,7 @@ for i = 2:size(G, 1)
     [Qi,Ri,pi] = qr(G(svi,svi), 0);
     
     % samples to exclude
-    exclude = abs(diag(R)) < tol;
+    exclude = abs(diag(Ri)) < tol;
     
     if sum(exclude) == 0
         % all samples above threshold
