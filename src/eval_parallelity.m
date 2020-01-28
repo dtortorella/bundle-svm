@@ -3,8 +3,9 @@ function p = eval_parallelity(X1, X2, kernel, varargin)
 % Cosine of the most orthogonal vector of X2 to the basis X1, or mean if requested.
 %
 % SYNOPSIS: p = eval_parallelity(X1, X2, kernel)
-%           p = eval_parallelity(X1, X2, ~, G)
-%           p = eval_parallelity(X1, X2, kernel, ~, 'mean')
+%           p = eval_parallelity(X1, X2, kernel, 'mean')
+%           p = eval_parallelity(X1, X2, G)
+%           p = eval_parallelity(X1, X2, G, 'mean')
 %
 % INPUT:
 % - X1: a matrix containing one sample feature vector per row of basis
@@ -20,10 +21,11 @@ function p = eval_parallelity(X1, X2, kernel, varargin)
 % Should be sort of an estimate of the subspace angle.
 
 % normalized Gram matrix between X1 and X2
-if nargin > 3 && ~isempty(varargin{1})
-    G = varargin{1}(X1,X2);
-else
+if isa(kernel,'function_handle')
     G = gram_norm_matrix2(X1, X2, kernel);
+else
+    G = kernel;
+    G = G(X1,X2);
 end
 
 % pick absolute cosines
@@ -33,7 +35,7 @@ G = abs(G);
 ps = max(G, [], 1);
 
 % compute metric
-if nargin > 4 && strcmp(varargin{2}, 'mean')
+if nargin > 3 && strcmp(varargin{1}, 'mean')
     % mean cosines of X2 vectors
     p = mean(ps);
 else
