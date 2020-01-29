@@ -11,7 +11,8 @@ maxs = min(-1,floor(log10(max(abs(diag(R))))));
 par_norm = [];
 ort_norm = [];
 parm_norm = [];
-    
+nsv_norm = [];
+
 tol = logspace(maxs-8,maxs,60);
 for i = 1:size(tol,2) 
     
@@ -22,12 +23,13 @@ for i = 1:size(tol,2)
     % p = 1:size(X,1);
     
     np = 1:size(Gn,1);
-    np(p) = [];
+    np(p) = []; % np are indexes not in p
+    nsv_norm(i) = size(p,2);
     par_norm(i) = eval_parallelity(p, np, Gn,'min');
     parm_norm(i) = eval_parallelity(p, np, Gn,'mean');
     ort_norm(i) = eval_orthonorm(p, Gn, 'normalize');
 end
-figure_ort_par_online('oQR, ionosphere, normalized quadratic gram',tol, ort_norm, par_norm, parm_norm);
+figure_ort_par_online('oQR, ionosphere, normalized quadratic gram',tol, nsv_norm, ort_norm, par_norm, parm_norm);
 
 %% ionophere, non-normalized
 
@@ -39,7 +41,7 @@ maxs = min(-1,floor(log10(max(abs(diag(R))))));
 par = [];
 ort = [];
 parm = [];
-    
+nsv = [];
 tol = logspace(maxs-8,maxs,60);
 for i = 1:size(tol,2) 
     
@@ -47,7 +49,7 @@ for i = 1:size(tol,2)
     S = abs(diag(R));
     % [U,R,~] = svd(Gn);
     % p = 1:size(X,1);
-    
+    nsv(i) = size(p,2);
     np = 1:size(G,1);
     np(p) = [];
     par(i) = eval_parallelity(X(p,:), X(np,:), kernel,'min');
@@ -55,7 +57,7 @@ for i = 1:size(tol,2)
     ort(i) = eval_orthonorm(X(p,:), kernel, 'normalize');
 
 end
-figure_ort_par_online('oQR, ionosphere, quadratic gram',tol, ort, par, parm);
+figure_ort_par_online('oQR, ionosphere, quadratic gram',tol, nsv, ort, par, parm);
 
 %% SVD
 % [U,R,~] = svd(Gn);

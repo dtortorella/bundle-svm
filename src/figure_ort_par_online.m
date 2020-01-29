@@ -1,32 +1,36 @@
-function f = figure_ort_par(name, tol, ort, par_min, par_mean, varargin)
-%FIGURE_ORT_PAR creates a figure for parallelity and orthogonality
-% evaluation
+function f = figure_ort_par_online(name, tol, nsv, ort, par_min, par_mean, varargin)
+%FIGURE_ORT_PAR_online creates a figure for parallelity and orthogonality
+% evaluation of online span selection methods
 %SYNOPSYS:
 
-if nargin > 5
-    indices = varargin{1}
+indices_bool = 0;
+if nargin > 6
+    indices = varargin{1};
+    indices_bool = 1;
 end
-f = figure('Name', name, 'Position', [100 100 1000 500]);
+
+f = figure('Name', name, 'Position', [100 100 600 400]);
 title(name)
-% yyaxis right
-% if nargin > 6
-%     plot(S(indices))
-% else
-%     plot(S)
-% end
+
+yyaxis right
+if indices_bool
+    plot(nsv(indices))
+else
+    plot(tol,nsv)
+end
 ax = get(f,'CurrentAxes');
-% set(ax, 'YScale', 'log')
-% ylabel 'singular values'
-% yyaxis left
+
+ylabel 'selected span vectors num.'
+yyaxis left
 hold on
-if nargin > 5
+if indices_bool
     plot(tol,ort(indices),'-b');
 else
     plot(tol,ort,'-b');
 end
 
 
-if nargin > 5
+if indices_bool
     plot(tol, par_min(indices),'-m');
     plot(tol, par_mean(indices), '--m')
 else
