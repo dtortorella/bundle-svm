@@ -6,8 +6,8 @@ function f = figure_ort_par(name, S, ort, par_min, par_mean, varargin)
 if nargin == 6
     indices = varargin{1}
 end
-f = figure('Name', name, 'Position', [100 100 1000 500]);
-title(name)
+f = figure('Name', name, 'Position', [100 100 600 400]);
+title(name,'Interpreter','Latex')
 yyaxis right
 if nargin == 6
     plot(S(indices))
@@ -35,7 +35,7 @@ else
 end
 ylabel 'consines'
 xlabel 'rank'
-legend('orthonormality', 'parallelity (min)', 'parallelity (mean)', 'singular values')
+legend('orthonormality', 'parallelity (min)', 'parallelity (mean)', 'singular values');
 
 end
 
