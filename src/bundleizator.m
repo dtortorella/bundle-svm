@@ -1,8 +1,8 @@
-function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+function [u, sv, t, epsilon, status] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 % BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
 % SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
-%           [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+%           [u, sv, t, epsilon, status] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -20,6 +20,7 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 % - sv: the indices in X of the support vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
+% - status: epsilon value for each iteration
 %
 % SEE ALSO bundleizator_pruning
 
@@ -32,6 +33,8 @@ quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 % Get the SVs, and compute Gram matrices
 G = gram_matrix(X, kernel);
 sv = select_span_vectors(G);
+
+% model.X = X(sv,:);
 
 GX = G(:,sv);
 G = G(sv,sv);
@@ -105,6 +108,10 @@ while true
     
     % Output iteration status
     fprintf('t = %d\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, Jmin, J_t, epsilon);
+
+    status(t) = epsilon;
+    %status(t,2) = acc;
+    % status = z;
     
     % Halt when we reach the desired precision
     if epsilon <= precision

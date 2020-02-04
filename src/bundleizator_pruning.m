@@ -1,8 +1,8 @@
-function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+function [u, sv, t, epsilon, status] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 % BUNDLEIZATOR_PRUNING Implements a bundle method that solves a generic SVM, with subgradient pruning
 %
 % SYNOPSIS: [u, sv] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
-%           [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+%           [u, sv, t, epsilon, status] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -24,6 +24,8 @@ function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss
 % - sv: the indices in X of the support vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
+% - status: status(:,1) contains the epsilon value at each iteration
+%           status(:,2) contains the bundle set dimension at each iteration
 %
 % REMARKS Suggested paramters for pruining are 50, 10^-7.
 %
@@ -113,7 +115,15 @@ while true
     
     % Output iteration status
     fprintf('t = %d (%d subgradients)\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, dim, Jmin, J_t, epsilon);
+    status(t,1) = epsilon;
+    status(t,2) = dim;
     
+%     model.u = u;
+%     model.kernel = kernel;
+%     pred = svm_predict(model, X, 'bundleizator');
+%     acc = mean( pred == y);
+%     status(t,2) = acc;
+
     % Halt when we reach the desired precision
     if epsilon <= precision
         break
