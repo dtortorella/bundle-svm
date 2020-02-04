@@ -10,7 +10,7 @@ if nargin > 6
 end
 
 f = figure('Name', name, 'Position', [100 100 600 400]);
-title(name)
+title(name,"Interpreter", "Latex")
 
 yyaxis right
 if indices_bool
@@ -20,7 +20,7 @@ else
 end
 ax = get(f,'CurrentAxes');
 
-ylabel 'selected span vectors num.'
+ylabel 'rank'
 yyaxis left
 hold on
 if indices_bool
@@ -38,10 +38,11 @@ else
     plot(tol,par_mean, '--m')
 end
 ylabel 'consines'
-xlabel 'tol'
+ylim([0 1])
+xlabel 'threshold'
 set(ax,'XScale', 'log');
 set(ax,'XDir', 'reverse');
-legend('orthonormality', 'parallelity (min)', 'parallelity (mean)')
+legend('orthonormality', 'parallelity (min)', 'parallelity (mean)','rank')
 
 end
 
