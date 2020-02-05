@@ -1,8 +1,8 @@
 function [u, sv, J] = big_fat_solver(X, y, C, kernel, precision, loss, varargin)
 %BIG_FAT_SOLVER Quadratic program solver for a SVM/SVR
 %
-% SYNOPSIS: [u, sv] = big_fat_solver(X, y, C, kernel, 'hinge')
-%           [u, sv] = big_fat_solver(X, y, C, kernel, 'epsilon', eps)
+% SYNOPSIS: [u, sv] = big_fat_solver(X, y, C, kernel, precison, 'hinge')
+%           [u, sv] = big_fat_solver(X, y, C, kernel, precision, 'epsilon', eps)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
