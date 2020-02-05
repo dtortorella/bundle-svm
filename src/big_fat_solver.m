@@ -1,4 +1,4 @@
-function [u, sv, J] = big_fat_solver(X, y, C, kernel, loss, varargin)
+function [u, sv, J] = big_fat_solver(X, y, C, kernel, precision, loss, varargin)
 %BIG_FAT_SOLVER Quadratic program solver for a SVM/SVR
 %
 % SYNOPSIS: [u, sv] = big_fat_solver(X, y, C, kernel, 'hinge')
@@ -8,6 +8,7 @@ function [u, sv, J] = big_fat_solver(X, y, C, kernel, loss, varargin)
 % - X: a matrix containing one sample feature vector per row
 % - y: a column vector containing one sample target per entry
 % - C: inverse of the regularization constant (1/lambda)
+% - precision: how close to the optimal value of J we should get
 % - kernel: a function that computes the scalar product of two vectors in feature space
 % - loss: type of loss, can be either 'hinge' for SVM or 'epsilon' for SVR
 %
@@ -23,7 +24,7 @@ function [u, sv, J] = big_fat_solver(X, y, C, kernel, loss, varargin)
 m = size(X, 1);
 
 % QP solver options
-quadprog_options = optimoptions(@quadprog, 'Display', 'iter');
+quadprog_options = optimoptions(@quadprog, 'Display', 'iter', 'OptimalityTolerance', precision);
 
 % Get the SVs, and compute Gram matrices
 G = gram_matrix(X, kernel);
