@@ -2,7 +2,7 @@ function [u, sv, J] = big_fat_solver(X, y, C, kernel, precision, loss, varargin)
 %BIG_FAT_SOLVER Quadratic program solver for a SVM/SVR
 %
 % SYNOPSIS: [u, sv] = big_fat_solver(X, y, C, kernel, precison, 'hinge')
-%           [u, sv] = big_fat_solver(X, y, C, kernel, precision, 'epsilon', eps)
+%           [u, sv] = big_fat_solver(X, y, C, kernel, precision, 'einsensitive', eps)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -10,7 +10,7 @@ function [u, sv, J] = big_fat_solver(X, y, C, kernel, precision, loss, varargin)
 % - C: inverse of the regularization constant (1/lambda)
 % - precision: how close to the optimal value of J we should get
 % - kernel: a function that computes the scalar product of two vectors in feature space
-% - loss: type of loss, can be either 'hinge' for SVM or 'epsilon' for SVR
+% - loss: type of loss, can be either 'hinge' for SVM or 'einsensitive' for SVR
 %
 % OUTPUT:
 % - u: the optimal values for the coefficients of the linear
