@@ -40,16 +40,16 @@ quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 G = gram_matrix(X, kernel);
 
 % Select span vectors
-if nargs > 7
-    switch lower(varargin{8})
+if nargin > 7
+    switch lower(varargin{1})
         case 'qr'
             sv = select_span_vectors(G);
         case 'srrqr'
-          sv = select_span_vectors(G, 'sRRQR', varargin{9}, varargin{10});
+          sv = select_span_vectors(G, 'sRRQR', varargin{2}, varargin{3});
         case 'online_qr'
-          sv = select_span_vectors(G, 'online_qr', varargin{9});
+          sv = select_span_vectors(G, 'online_qr', varargin{2});
         case 'online_svd'
-          sv = select_span_vectors(G, 'online_svd', varargin{9});
+          sv = select_span_vectors(G, 'online_svd', varargin{2});
         otherwise
           error('Unknown span selection algorithm')
     end
