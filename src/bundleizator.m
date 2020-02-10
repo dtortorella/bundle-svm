@@ -1,9 +1,13 @@
-function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
-% BUNDLEIZATOR Implements a bundle method that solves a generic SVM
+function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision, varargin)
+% BUNDLEIZATOR Implements a bundle method with span vector selection that solves a generic SVM
 %
 % SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %           [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
-%
+%           
+%           [..] = bundleizator(..., 'qr', tol)
+%           [..] = bundleizator(..., 'online_qr', tol)
+%           [..] = bundleizator(..., 'online_svd', tol)
+%           [..] = bundleizator(..., 'sRRQR', f, tol)
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
 % - y: a column vector containing one sample target per entry
@@ -13,6 +17,9 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 %         arguments the sample target y and the scalar product f = <w,x>
 % - dloss: a subgradient of the loss function with respect to f
 % - precision: the required distance from optimality
+% 
+% - tol: the tolerance on singular values for span selection methods
+% - f: the f value parameter for sRRQR factorization
 %
 % OUTPUT:
 % - u: the optimal values for the coefficients of the linear
@@ -21,7 +28,7 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
 %
-% SEE ALSO bundleizator_pruning
+% SEE ALSO bundleizator_pruning, select_span_vectors
 
 %% Initialization
 num_samples = size(X, 1);
@@ -29,10 +36,26 @@ num_samples = size(X, 1);
 % Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
-% Get the SVs, and compute Gram matrices
+% Compute Gram matrice
 G = gram_matrix(X, kernel);
 
-sv = select_span_vectors(G);
+% Select span vectors
+if nargs > 7
+    switch lower(varargin{8})
+        case 'qr'
+            sv = select_span_vectors(G);
+        case 'srrqr'
+          sv = select_span_vectors(G, 'sRRQR', varargin{9}, varargin{10});
+        case 'online_qr'
+          sv = select_span_vectors(G, 'online_qr', varargin{9});
+        case 'online_svd'
+          sv = select_span_vectors(G, 'online_svd', varargin{9});
+        otherwise
+          error('Unknown span selection algorithm')
+    end
+else
+     sv = select_span_vectors(G);
+end
 
 % Gamma and Gram matrix reduction given selected span vectors
 Gamma = G(:,sv);
