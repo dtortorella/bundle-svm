@@ -3,14 +3,16 @@ function o = eval_orthonorm(X, kernel, varargin)
 % Average pairwise cosines between vectors in kernel space is the metric.
 %
 % SYNOPSIS: o = eval_orthonorm(X, kernel)
-%           o = eval_orthonorm(X, ~, G)
-%           o = eval_orthonorm(X, kernel, ~, 'normalize')
+%           o = eval_orthonorm(X, kernel, 'normalize')
+%           o = eval_orthonorm(X, G)
+%           o = eval_orthonorm(X, G, 'normalize')
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
 % - kernel: a function that computes the scalar product of two vectors
 %           in feature space (takes row vectors)
-% - G: normalized Gram matrix; if not empty, X are indices of this matrix
+% - G: precomputed normalized Gram matrix; 
+%      if given instead of a kernel function, X are indices of this matrix
 %
 % OUTPUT:
 % - o: an orthonormality metric, lower is better

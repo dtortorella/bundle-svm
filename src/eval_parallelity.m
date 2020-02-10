@@ -3,21 +3,24 @@ function p = eval_parallelity(X1, X2, kernel, varargin)
 % Cosine of the most orthogonal vector of X2 to the basis X1, or mean if requested.
 %
 % SYNOPSIS: p = eval_parallelity(X1, X2, kernel)
-%           p = eval_parallelity(X1, X2, ~, G)
-%           p = eval_parallelity(X1, X2, kernel, ~, 'mean')
+%           p = eval_parallelity(X1, X2, kernel,'mean')
+%           p = eval_parallelity(X1, X2, G)
+%           p = eval_parallelity(X1, X2, G, 'mean')
+%           
 %
 % INPUT:
 % - X1: a matrix containing one sample feature vector per row of basis
 % - X2: a matrix containing one sample feature vector per row of set to check
 % - kernel: a function that computes the scalar product of two vectors
 %           in feature space (takes row vectors)
-% - G: normalized Gram matrix; if not empty, X1 and X2 are indices of this matrix
+% - G: precomputed normalized Gram matrix; 
+%      if given instead of kernel function, X1 and X2 are indices of this matrix
 %
 % OUTPUT:
 % - p: a parallelity metric, higher is better (in [0,1] range)
 %
 % REMARKS:
-% Should be sort of an estimate of the subspace angle.
+% Should be a kind of an estimate of the subspace angle.
 
 % normalized Gram matrix between X1 and X2
 if nargin > 3 && ~isempty(varargin{1})
