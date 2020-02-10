@@ -1,4 +1,4 @@
-function [u, sv, t, epsilon, status] = bundleizator(X, y, C, kernel, loss, dloss, precision)
+function [u, sv, t, epsilon, status,U] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 % BUNDLEIZATOR Implements a bundle method that solves a generic SVM
 %
 % SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
@@ -109,7 +109,12 @@ while true
     % Output iteration status
     fprintf('t = %d\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, Jmin, J_t, epsilon);
 
-    status(t) = epsilon;
+    status(t,1) = epsilon;
+    status(t,2) = Jmin;
+    status(t,3) = J_t;
+    status(t,4) = J;
+    U(:,t) = u;
+    
     %status(t,2) = acc;
     % status = z;
     
