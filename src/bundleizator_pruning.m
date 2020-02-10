@@ -39,7 +39,7 @@ quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 G = gram_matrix(X, kernel);
 sv = select_span_vectors(G);
 
-GX = G(:,sv);
+Gamma = G(:,sv);
 G = G(sv,sv);
 
 num_sv = length(sv);
@@ -60,9 +60,9 @@ Remp = Remp / num_samples;
 Jmin = Remp;
 
 % variables initialization
-A = [];
-b = [];
-H = [];
+A = []; % subgradients matrix
+b = []; % residuals vector
+H = []; % master problem matrix
 vdloss = zeros(num_samples, 1);
 inactive_count = [];
 
@@ -71,13 +71,14 @@ while true
     % Increment step
     t = t + 1;
     
-    % Compute a_t
-    % compute dloss at point u_t-1
+    % Subgradient a_t computation
+      
+       % compute dloss at point u_t-1
     for i = 1:num_samples
         vdloss(i) = dloss(f(i), y(i));
     end
-    
-    A(:,end+1) = GX' * vdloss / num_samples;
+       % compute a_t
+    A(:,end+1) = Gamma' * vdloss / num_samples;
     
     % Compute b_t
     b(end+1,1) = Remp - A(:,end)' * u;
@@ -87,23 +88,23 @@ while true
     H = [H, h(1:end-1)'; h];
     
     % Solve the dual of the quadratic master problem
-    dim = length(b);
+    dim = length(b); % problem dimension now is the number of active subgradients
     z = quadprog(0.5 * C * H, -b, -eye(dim), zeros(dim,1), ones(1,dim), 1, [], [], [], quadprog_options);
     % Get optimal point thru dual connection
     u = -0.5 * C * (G \ (A * z));
 
-    % Compute Remp at point u_t
+    % Evaluate Remp at point u_t
     Remp = 0;
-    f = GX * u;
+    f = Gamma * u;
     for i = 1:num_samples
         Remp = Remp + loss(f(i), y(i));
     end
     Remp = Remp / num_samples;
     
-    % Compute J(u_t)
+    % Evaluate J at point iteration point u_t
     J =  1/C * (u' * G * u) + Remp;
     
-    % Evaluate J_t at point u_t
+    % Compute J_t at point u_t
     R_t = max(u' * A + b');
     J_t = 1/C * (u' * G * u) + R_t;
     

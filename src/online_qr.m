@@ -8,7 +8,7 @@ function [Q,R,p,sv] = online_qr(G, tol)
 % INPUT:
 % - G: the matrix of products of sample vectors in feature space, via the
 %      kernel function (Gram matrix)
-% - tol: threshold. diagonal values of R with absolute value lower than tol
+% - tol: threshold. Diagonal values of R with absolute value lower than tol
 %        will be considered 0
 %
 % OUTPUT:

@@ -4,8 +4,8 @@ function G = gram_matrix2(X1, X2, kernel)
 % SYNOPSIS: G = gram_matrix2(X1, X2, kernel)
 %
 % INPUT:
-% - X1, X2: a matrix containing one sample feature vector per row,
-%           they must have the same columns
+% - X1, X2: matrices containing one sample feature vector per row,
+%           they must have the same number of columns
 % - kernel: a function that computes the scalar product of two vectors
 %           in feature space (takes row vectors)
 %
