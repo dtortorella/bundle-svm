@@ -1,8 +1,13 @@
-function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold, varargin)
 % BUNDLEIZATOR_PRUNING Implements a bundle method that solves a generic SVM, with subgradient pruning
 %
 % SYNOPSIS: [u, sv] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 %           [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
+%
+%           [..] = bundleizator(..., 'qr', tol)
+%           [..] = bundleizator(..., 'online_qr', tol)
+%           [..] = bundleizator(..., 'online_svd', tol)
+%           [..] = bundleizator(..., 'sRRQR', f, tol)
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -27,7 +32,7 @@ function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss
 %
 % REMARKS Suggested paramters for pruining are 50, 10^-7.
 %
-% SEE ALSO bundleizator
+% SEE ALSO bundleizator, select_span_vectors
 
 %% Initialization
 num_samples = size(X, 1);
@@ -35,10 +40,28 @@ num_samples = size(X, 1);
 % Master problem solver options
 quadprog_options = optimoptions(@quadprog, 'Display', 'off');
 
-% Get the SVs, and compute Gram matrices
+% Compute Gram matrices
 G = gram_matrix(X, kernel);
-sv = select_span_vectors(G);
 
+% Select span vectors
+if nargin > 9
+    switch lower(varargin{1})
+        case 'qr'
+            sv = select_span_vectors(G);
+        case 'srrqr'
+          sv = select_span_vectors(G, 'sRRQR', varargin{2}, varargin{3});
+        case 'online_qr'
+          sv = select_span_vectors(G, 'online_qr', varargin{2});
+        case 'online_svd'
+          sv = select_span_vectors(G, 'online_svd', varargin{2});
+        otherwise
+          error('Unknown span selection algorithm')
+    end
+else
+     sv = select_span_vectors(G);
+end
+
+% Gamma and Gram matrices reduction according to selected span vectors
 Gamma = G(:,sv);
 G = G(sv,sv);
 
