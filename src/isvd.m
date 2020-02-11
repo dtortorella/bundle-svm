@@ -1,5 +1,5 @@
-function [U,S,sv] = online_svd(G, tol)
-%ONLINE_SVD computes rank-m SVD of a Gram matrix estimating m 
+function [U,S,sv] = isvd(G, tol)
+%ISVD computes rank-m SVD of a Gram matrix estimating m 
 % using one sample at a time and repeated svd decomposition, selecting m
 % indipendent row/cols of the matrix G.
 % 

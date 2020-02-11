@@ -1,5 +1,5 @@
-function [Q,R,p,sv] = online_qr(G, tol)
-%ONLINE_QR Computes a rank-k QR factorization of a Gram matrix estimating k
+function [Q,R,p,sv] = iqr(G, tol)
+%OIQR Computes a rank-k QR factorization of a Gram matrix estimating k
 % using one sample at a time and repeated qr factorization,
 % selecting k linear independent row/cols of G.
 % 

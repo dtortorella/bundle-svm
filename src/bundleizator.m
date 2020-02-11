@@ -4,9 +4,9 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 % SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %           [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %           
-%           [..] = bundleizator(..., 'qr', tol)
-%           [..] = bundleizator(..., 'online_qr', tol)
-%           [..] = bundleizator(..., 'online_svd', tol)
+%           [..] = bundleizator(..., 'qr')
+%           [..] = bundleizator(..., 'iqr', tol)
+%           [..] = bundleizator(..., 'isvd', tol)
 %           [..] = bundleizator(..., 'sRRQR', f, tol)
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -46,10 +46,10 @@ if nargin > 7
             sv = select_span_vectors(G);
         case 'srrqr'
           sv = select_span_vectors(G, 'sRRQR', varargin{2}, varargin{3});
-        case 'online_qr'
-          sv = select_span_vectors(G, 'online_qr', varargin{2});
-        case 'online_svd'
-          sv = select_span_vectors(G, 'online_svd', varargin{2});
+        case 'iqr'
+          sv = select_span_vectors(G, 'iqr', varargin{2});
+        case 'isvd'
+          sv = select_span_vectors(G, 'isvd', varargin{2});
         otherwise
           error('Unknown span selection algorithm')
     end
