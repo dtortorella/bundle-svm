@@ -26,13 +26,20 @@ tic;
 [u_p, sv_p, t_p, eps_p] = bundleizator_pruning(X, y, C, kernel, loss, dloss, bar_eps, max_inactive_count, inactive_zero_threshold);
 t_prunin = toc;
 
-%% Primal problem solver
+%% QP solver for original problem
 tic;
-[u_prim, sv_prim, J] = big_fat_solver(X, y, C, kernel, bar_eps, 'einsensitive', 0.2);
-t_prim = toc;
+[u_qp, sv_qp, J] = big_fat_solver(X, y, C, kernel, bar_eps, 'einsensitive', 0.2);
+t_qp = toc;
+
+%% 
+fprintf("Times of execuion comparison \n");
+fprintf("bundle method \t pruning \t qp original \n");
+fprintf("%e \t %e \t %e \n", t_bundle, t_pruning, t_qp);
 
 
+%%
 %% Span vector selection
+
 G = gram_matrix(X, kernel);
 Gn = gram_norm_matrix(X,kernel);
 
@@ -41,9 +48,10 @@ tol = 1e-6;
 
 sv = select_span_vectors(G, 'sRRQR', f, tol);
 
-o = eval_orthonorm(sv,Gn,'normalize');
-nonsv = 1:size(G,2)
-p = eval_parallelity(sv, ();
+o = eval_orthonorm(sv, Gn, 'normalize');
+nonsv = 1:size(G,2);
+nonsv(sv) = [];
+p = eval_parallelity(sv, nonsv ,Gn, 'normalize');
 
 GX = G(:,sv);
 G = G(sv,sv);
