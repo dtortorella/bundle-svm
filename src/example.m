@@ -10,7 +10,7 @@ kernel = @(x,y) exp(-.1*norm(x-y)^2);
 loss = @(f,y) einsensitive_loss(f, y, 0.2);
 dloss = @(f,y) einsensitive_dloss(f, y, 0.2);
 
-C = 1e5;
+C = 1e4;
 bar_eps = 1e-4;
 
 max_inactive_count = 5;
@@ -24,7 +24,7 @@ t_bundle = toc;
 %% Bundleizator run with pruning
 tic;
 [u_p, sv_p, t_p, eps_p] = bundleizator_pruning(X, y, C, kernel, loss, dloss, bar_eps, max_inactive_count, inactive_zero_threshold);
-t_prunin = toc;
+t_pruning = toc;
 
 %% QP solver for original problem
 tic;
@@ -34,7 +34,7 @@ t_qp = toc;
 %% 
 fprintf("Times of execuion comparison \n");
 fprintf("bundle method \t pruning \t qp original \n");
-fprintf("%e \t %e \t %e \n", t_bundle, t_pruning, t_qp);
+fprintf("%f \t %f \t %f \n", t_bundle, t_pruning, t_qp);
 
 
 %%
@@ -55,3 +55,5 @@ p = eval_parallelity(sv, nonsv ,Gn, 'normalize');
 
 GX = G(:,sv);
 G = G(sv,sv);
+
+
