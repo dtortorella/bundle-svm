@@ -1,3 +1,4 @@
+addpath('./src')
 %% Monks experiments
 %monks_kernels = containers.Map({'linear', 'quadratic', 'cubic', 'gaussian'}, {'-t 0', '-t 1 -d 2', '-t 1 -d 3',  '-t 2'});
 monks_kernels_libsvm = containers.Map({'linear homog.', 'linear (c=0.5)', 'linear (c=1)', 'linear (c=5)', ...
@@ -21,8 +22,8 @@ monks_kernels = containers.Map({'linear homog.', 'linear (c=0.5)', 'linear (c=1)
 %% Monk 1 dataset experiment
  
 % % Data import and labels fixing
-monk1_training_set = importdata("../data/monks-1.train.csv");
-monk1_test_set = importdata("../data/monks-1.test.clean.csv");
+monk1_training_set = importdata("./data/monks-1.train.csv");
+monk1_test_set = importdata("./data/monks-1.test.clean.csv");
 
 monk1_train_classes = monk1_training_set(:,1) * 2 - 1;
 monk1_train_features = monk1_training_set(:,2:end);
@@ -57,8 +58,8 @@ monk1_test_features = monk1_test_set(:,2:end);
 %% Monk 2 dataset experiment
 
 % Data import and labels fixing
-monk2_training_set = importdata("../data/monks-2.train.csv");
-monk2_test_set = importdata("../data/monks-2.test.clean.csv");
+monk2_training_set = importdata("./data/monks-2.train.csv");
+monk2_test_set = importdata("./data/monks-2.test.clean.csv");
 
 monk2_train_classes = monk2_training_set(:,1) * 2 - 1;
 monk2_train_features = monk2_training_set(:,2:end);
@@ -95,8 +96,8 @@ monk2_test_features = monk2_test_set(:,2:end);
 %% Monk 3 dataset experiment
 
 % Data import and labels fixing
-monk3_training_set = importdata("../data/monks-3.train.csv");
-monk3_test_set = importdata("../data/monks-3.test.clean.csv");
+monk3_training_set = importdata("./data/monks-3.train.csv");
+monk3_test_set = importdata("./data/monks-3.test.clean.csv");
  
 monk3_train_classes = monk3_training_set(:,1) * 2 - 1;
 monk3_train_features = monk3_training_set(:,2:end);
@@ -135,8 +136,8 @@ mlcup_kernels = containers.Map({'linear homog.', 'linear (c=0.5)', 'linear (c=1)
  @(x,y) exp(-.1*norm(x-y)^2), @(x,y) exp(-.5*norm(x-y)^2), @(x,y) exp(-norm(x-y)^2), @(x,y) exp(-5*norm(x-y)^2)});
 
 % Data import
-mlcup_training_set = importdata("../data/ml-cup17.train.csv");
-mlcup_test_set = importdata("../data/ml-cup17.test.csv");
+mlcup_training_set = importdata("./data/ml-cup17.train.csv");
+mlcup_test_set = importdata("./data/ml-cup17.test.csv");
 
 mlcup_train_inputs = mlcup_training_set(:,2:end-2);
 mlcup_train_outputs = mlcup_training_set(:,end-1:end);

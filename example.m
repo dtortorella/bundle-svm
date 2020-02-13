@@ -1,5 +1,6 @@
+addpath('./src')
 %% Load MLCUP17 dataset
-mlcup_training_set = importdata("../data/ml-cup17.train.csv");
+mlcup_training_set = importdata("./data/ml-cup17.train.csv");
 mlcup_train_outputs = mlcup_training_set(:,end-1:end);
 
 X = mlcup_training_set(:,2:end-2);
