@@ -8,6 +8,8 @@ y = mlcup_training_set(:,end-1);
 
 %% Kernel, loss and params definition
 kernel = @(x,y) exp(-.1*norm(x-y)^2);
+kernel2 = @(x,y) (x*y').^2;
+
 loss = @(f,y) einsensitive_loss(f, y, 0.2);
 dloss = @(f,y) einsensitive_dloss(f, y, 0.2);
 
@@ -41,8 +43,8 @@ fprintf("%f \t %f \t %f \n", t_bundle, t_pruning, t_qp);
 %%
 %% Span vector selection
 
-G = gram_matrix(X, kernel);
-Gn = gram_norm_matrix(X,kernel);
+G = gram_matrix(X, kernel2);
+Gn = gram_norm_matrix(X,kernel2);
 
 f = 1;
 tol = 1e-6;
