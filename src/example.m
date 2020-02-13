@@ -46,14 +46,24 @@ Gn = gram_norm_matrix(X,kernel);
 f = 1;
 tol = 1e-6;
 
-sv = select_span_vectors(G, 'sRRQR', f, tol);
+sv_srrqr = select_span_vectors(G, 'sRRQR', f, tol);
+sv_isvd = select_span_vectors(G, 'isvd', tol);
+sv_iqr = select_span_vectors(G, 'iqr', tol);
+sv_qr = select_span_vectors(G);
 
-o = eval_orthonorm(sv, Gn, 'normalize');
+sv = sv_srrqr;
+
+o = eval_orthonorm(sv_srrqr, Gn, 'normalize');
+
 nonsv = 1:size(G,2);
-nonsv(sv) = [];
-p = eval_parallelity(sv, nonsv ,Gn, 'normalize');
+nonsv(sv_srrqr) = [];
+pmin = eval_parallelity(sv_srrqr, nonsv ,Gn, 'min');
+pmean = eval_parallelity(sv_srrqr, nonsv, Gn, 'mean');
 
-GX = G(:,sv);
-G = G(sv,sv);
+GX = G(:,sv_srrqr);
+G = G(sv_srrqr,sv_srrqr);
+
+
+
 
 
