@@ -1,13 +1,15 @@
-function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold, varargin)
+function [u, sv, t, epsilon, status, U] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold, varargin)
 % BUNDLEIZATOR_PRUNING Implements a bundle method that solves a generic SVM, with subgradient pruning
 %
 % SYNOPSIS: [u, sv] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
 %           [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss, precision, max_inactive_count, inactive_zero_threshold)
-%
+%           [u, sv, t, epsilon, status, U] = bundleizator_pruning(...)
+% 
 %           [..] = bundleizator(..., 'qr')
 %           [..] = bundleizator(..., 'iqr', tol)
 %           [..] = bundleizator(..., 'isvd', tol)
 %           [..] = bundleizator(..., 'sRRQR', f, tol)
+%           
 %
 % INPUT:
 % - X: a matrix containing one sample feature vector per row
@@ -32,7 +34,16 @@ function [u, sv, t, epsilon] = bundleizator_pruning(X, y, C, kernel, loss, dloss
 % - sv: the indices in X of the support vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
-%
+% 
+% - status: contains values for each algorithm step t
+%     status(t,1) = epsilon;
+%     status(t,2) = Jmin;
+%     status(t,3) = J_t(u_t);
+%     status(t,4) = J(u_t);
+%     status(t,5) = R_t(u_t);
+%     status(t,6) = number of active subgradient;
+% - U: column t is the solution from the master problem at iteration t
+% 
 % REMARKS Suggested paramters for pruining are 50, 10^-7.
 %
 % SEE ALSO bundleizator, select_span_vectors
@@ -140,6 +151,14 @@ while true
     
     % Output iteration status
     fprintf('t = %d (%d subgradients)\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, dim, Jmin, J_t, epsilon);
+    
+    status(t,1) = epsilon;
+    status(t,2) = Jmin;
+    status(t,3) = J_t;
+    status(t,4) = J;
+    status(t,5) = R_t;
+    status(t,6) = dim;
+    U(:,t) = u;
     
     % Halt when we reach the desired precision
     if epsilon <= precision

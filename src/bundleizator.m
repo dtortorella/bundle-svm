@@ -1,9 +1,10 @@
-function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision, varargin)
+function [u, sv, t, epsilon, status, U] = bundleizator(X, y, C, kernel, loss, dloss, precision, varargin)
 % BUNDLEIZATOR Implements a bundle method with span vector selection that solves a generic SVM
 %
 % SYNOPSIS: [u, sv] = bundleizator(X, y, C, kernel, loss, dloss, precision)
 %           [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precision)
-%           
+%           [u, sv, t, epsilon, status, U] = bundleizator(...)
+%
 %           [..] = bundleizator(..., 'qr')
 %           [..] = bundleizator(..., 'iqr', tol)
 %           [..] = bundleizator(..., 'isvd', tol)
@@ -27,6 +28,14 @@ function [u, sv, t, epsilon] = bundleizator(X, y, C, kernel, loss, dloss, precis
 % - sv: the indices in X of the support vectors
 % - t: the number of optimization loop iterations done
 % - epsilon: precision reached in the last iteration
+%
+% - status: contains values for each algorithm step t
+%     status(t,1) = epsilon;
+%     status(t,2) = Jmin;
+%     status(t,3) = J_t(u_t);
+%     status(t,4) = J(u_t);
+%     status(t,5) = R_t(u_t);
+% - U: column t is the solution from the master problem at iteration t
 %
 % SEE ALSO bundleizator_pruning, select_span_vectors
 
@@ -136,6 +145,13 @@ while true
     
     % Output iteration status
     fprintf('t = %d\t Jmin = %e\t J_t(u_t) = %e\t e_t = %e\n', t, Jmin, J_t, epsilon);
+    
+    status(t,1) = epsilon;
+    status(t,2) = Jmin;
+    status(t,3) = J_t;
+    status(t,4) = J;
+    status(t,5) = R_t;
+    U(:,t) = u;
     
     % Halt when we reach the desired precision
     if epsilon <= precision
