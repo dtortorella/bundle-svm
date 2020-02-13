@@ -35,7 +35,7 @@ switch lower(algorithm)
         [~,~,p] = qr(G,0);
         sv = p(:,1:rank(G));
     case 'srrqr'
-        % sRRQR by Gu & Eisenstat
+        % sRRQR by Gu & Eisenstat implemented by Xin Xing
         [~,~,sv] = sRRQR_tol(G, varargin{2}, varargin{3});
     case 'iqr'
         % repeat qr adding one sample at a time, estimating rank
