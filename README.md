@@ -36,8 +36,8 @@ Every function is well documented in their own matlab file.
 
 ### Machine learning
 
-*svm_select_model.m*, *svm_train.m*, *svm_predict.m*, *svm_select_model_bayesianely.m*: implement model selection, training and prediction for a classification task.
-*svr_select_model.m*,*svr_train.m*, *svr_predict.m*, *svr_select_model_bayesianely.m*: implement model selection, training and prediction for a regression task.
+* *svm_select_model.m*, *svm_train.m*, *svm_predict.m*, *svm_select_model_bayesianely.m*: implement model selection, training and prediction for a classification task.
+* *svr_select_model.m*,*svr_train.m*, *svr_predict.m*, *svr_select_model_bayesianely.m*: implement model selection, training and prediction for a regression task.
 
 ### Utility functions
 * *einsensitive_loss.m , einsensitive_dloss.m*, *hinge_loss.m , hinge_dloss.m*: implementation of losses and their derivatives
