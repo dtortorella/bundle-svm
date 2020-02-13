@@ -2,7 +2,7 @@
 
 Support vector machine with bundle method and span vector selection.
 
-We provide an *example.m* script to run the optimization algorithm code in a simple enviroment of a regression task with MLCUP17 dataset; *MLexample.m* script to run a model selection on different datasets for classification and regression models.
+We provide an *example.m* script to run the optimization algorithm code in a simple enviroment of a regression task with MLCUP17 dataset; *ml_example.m* script to run a model selection on different datasets for classification and regression models.
 
 Every function is well documented in their own matlab file.
 
