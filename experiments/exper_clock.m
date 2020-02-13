@@ -9,7 +9,7 @@ y = mlcup_training_set(:,end-1);
 kernel = @(x,y) exp(-.1*norm(x-y)^2);
 % parameters to explore
 C = 10.^(2:6);
-C = 10^5;
+
 eps = logspace(-8, -2, 13); % \bar{epsilon}
 
 % mean of trials as reported time
